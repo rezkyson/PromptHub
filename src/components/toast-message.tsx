@@ -1,0 +1,18 @@
+"use client";
+
+import { useEffect } from "react";
+import { toast } from "sonner";
+
+type ToastMessageProps = {
+  message?: string;
+};
+
+export function ToastMessage({ message }: ToastMessageProps) {
+  useEffect(() => {
+    if (message) {
+      toast.success(message);
+    }
+  }, [message]);
+
+  return null;
+}
