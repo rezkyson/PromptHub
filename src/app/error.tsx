@@ -1,5 +1,7 @@
 "use client";
 
+import { RotateCcwIcon } from "lucide-react";
+
 import { ErrorState } from "@/components/error-state";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +17,7 @@ export default function RootError({ reset }: RootErrorProps) {
         <ErrorState
           action={
             <Button className="rounded-full" onClick={reset} type="button">
+              <RotateCcwIcon aria-hidden="true" />
               Coba lagi
             </Button>
           }

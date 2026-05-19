@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FileTextIcon, Globe2Icon, LockKeyholeIcon, PlusIcon } from "lucide-react";
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { EmptyState } from "@/components/empty-state";
@@ -34,16 +35,19 @@ export default async function DashboardPage() {
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         <StatCard
           description="Semua prompt yang kamu simpan."
+          icon={FileTextIcon}
           label="Total prompt"
           value={stats.total}
         />
         <StatCard
           description="Prompt yang terlihat di public feed."
+          icon={Globe2Icon}
           label="Public"
           value={stats.public}
         />
         <StatCard
           description="Prompt yang hanya bisa kamu lihat."
+          icon={LockKeyholeIcon}
           label="Private"
           value={stats.private}
         />
@@ -59,7 +63,10 @@ export default async function DashboardPage() {
           </h2>
         </div>
         <Button asChild className="rounded-full">
-          <Link href="/dashboard/prompts/new">Buat prompt</Link>
+          <Link href="/dashboard/prompts/new">
+            <PlusIcon aria-hidden="true" />
+            Buat prompt
+          </Link>
         </Button>
       </div>
 
@@ -73,7 +80,10 @@ export default async function DashboardPage() {
         <EmptyState
           action={
             <Button asChild className="rounded-full">
-              <Link href="/dashboard/prompts/new">Buat prompt pertama</Link>
+              <Link href="/dashboard/prompts/new">
+                <PlusIcon aria-hidden="true" />
+                Buat prompt pertama
+              </Link>
             </Button>
           }
           className="mt-5"

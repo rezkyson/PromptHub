@@ -1,3 +1,5 @@
+import { Trash2Icon, TriangleAlertIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,12 +26,16 @@ export function DeletePromptDialog({ promptId }: DeletePromptDialogProps) {
           className="rounded-full"
           variant="secondary"
         >
+          <Trash2Icon aria-hidden="true" />
           Hapus
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Hapus prompt?</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <TriangleAlertIcon aria-hidden="true" className="size-5" />
+            Hapus prompt?
+          </DialogTitle>
           <DialogDescription>
             Yakin ingin menghapus prompt ini? Aksi ini tidak bisa dibatalkan.
           </DialogDescription>
@@ -41,6 +47,7 @@ export function DeletePromptDialog({ promptId }: DeletePromptDialogProps) {
           <form action={deletePromptAction}>
             <input name="id" type="hidden" value={promptId} />
             <Button aria-label="Konfirmasi hapus prompt" type="submit">
+              <Trash2Icon aria-hidden="true" />
               Hapus
             </Button>
           </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { RotateCcwIcon, UserPlusIcon, PlusIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { EmptyState } from "@/components/empty-state";
@@ -182,11 +183,17 @@ export function PublicPromptBrowser(props: PromptBrowserProps) {
           action={
             isFiltering ? (
               <Button asChild className="rounded-full" variant="secondary">
-                <Link href="/prompts">Reset filter</Link>
+                <Link href="/prompts">
+                  <RotateCcwIcon aria-hidden="true" />
+                  Reset filter
+                </Link>
               </Button>
             ) : (
               <Button asChild className="rounded-full">
-                <Link href="/register">Register</Link>
+                <Link href="/register">
+                  <UserPlusIcon aria-hidden="true" />
+                  Register
+                </Link>
               </Button>
             )
           }
@@ -248,11 +255,17 @@ export function MyPromptBrowser(props: PromptBrowserProps) {
           action={
             isFiltering ? (
               <Button asChild className="rounded-full" variant="secondary">
-                <Link href="/dashboard/prompts">Reset filter</Link>
+                <Link href="/dashboard/prompts">
+                  <RotateCcwIcon aria-hidden="true" />
+                  Reset filter
+                </Link>
               </Button>
             ) : (
               <Button asChild className="rounded-full">
-                <Link href="/dashboard/prompts/new">Buat prompt pertama</Link>
+                <Link href="/dashboard/prompts/new">
+                  <PlusIcon aria-hidden="true" />
+                  Buat prompt pertama
+                </Link>
               </Button>
             )
           }

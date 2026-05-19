@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PlusIcon } from "lucide-react";
 
 import { MyPromptBrowser } from "@/components/prompts/prompt-browsers";
 import { ToastMessage } from "@/components/toast-message";
@@ -58,7 +59,10 @@ export default async function MyPromptsPage({
           </h1>
         </div>
         <Button asChild className="rounded-full">
-          <Link href="/dashboard/prompts/new">Buat prompt</Link>
+          <Link href="/dashboard/prompts/new">
+            <PlusIcon aria-hidden="true" />
+            Buat prompt
+          </Link>
         </Button>
       </div>
 

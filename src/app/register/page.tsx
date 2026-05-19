@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LockKeyholeIcon, MailIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { AuthMessage } from "@/components/auth/auth-message";
@@ -51,7 +52,10 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           <AuthMessage error={error} message={message} />
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">
+              <MailIcon aria-hidden="true" />
+              Email
+            </Label>
             <Input
               autoComplete="email"
               id="email"
@@ -63,7 +67,10 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">
+              <LockKeyholeIcon aria-hidden="true" />
+              Password
+            </Label>
             <Input
               autoComplete="new-password"
               id="password"

@@ -1,3 +1,4 @@
+import { LogOutIcon, UserPlusIcon } from "lucide-react";
 import Link from "next/link";
 
 import { SiteNavLinks } from "@/components/site-nav-links";
@@ -10,7 +11,7 @@ export async function SiteHeader() {
   const user = await getCurrentUser();
 
   return (
-    <header className="border-b bg-background/95">
+    <header className="border-b bg-background/95" data-motion="site-header">
       <nav className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-5 sm:px-10 lg:px-12">
         <div className="flex items-center justify-between gap-4">
           <Link className="text-xl font-medium tracking-tight" href="/">
@@ -21,12 +22,16 @@ export async function SiteHeader() {
             {user ? (
               <form action={logoutAction}>
                 <Button className="rounded-full" type="submit">
+                  <LogOutIcon aria-hidden="true" />
                   Logout
                 </Button>
               </form>
             ) : (
               <Button asChild className="rounded-full">
-                <Link href="/register">Register</Link>
+                <Link href="/register">
+                  <UserPlusIcon aria-hidden="true" />
+                  Register
+                </Link>
               </Button>
             )}
           </div>

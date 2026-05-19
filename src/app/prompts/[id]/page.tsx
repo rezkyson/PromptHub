@@ -1,4 +1,11 @@
 import Link from "next/link";
+import {
+  CalendarDaysIcon,
+  FileTextIcon,
+  PencilIcon,
+  RefreshCwIcon,
+  UserRoundIcon,
+} from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { DeletePromptDialog } from "@/components/prompts/delete-prompt-dialog";
@@ -68,9 +75,13 @@ export default async function PromptDetailPage({ params }: PromptDetailPageProps
             <div className="mb-4 flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-mono text-xs uppercase tracking-[0.16em]">
+                  <FileTextIcon aria-hidden="true" className="mr-2 inline size-4" />
                   Prompt Content
                 </p>
-                <p className="mt-1 text-sm">Author: {authorName}</p>
+                <p className="mt-1 inline-flex items-center gap-1 text-sm">
+                  <UserRoundIcon aria-hidden="true" className="size-4" />
+                  Author: {authorName}
+                </p>
               </div>
               <CopyPromptButton content={prompt.content} />
             </div>
@@ -88,11 +99,17 @@ export default async function PromptDetailPage({ params }: PromptDetailPageProps
               <dl className="mt-4 space-y-3 text-sm">
                 <div>
                   <dt className="font-medium">Dibuat</dt>
-                  <dd>{formatDateTime(prompt.createdAt)}</dd>
+                  <dd className="mt-1 inline-flex items-center gap-1">
+                    <CalendarDaysIcon aria-hidden="true" className="size-4" />
+                    {formatDateTime(prompt.createdAt)}
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-medium">Diperbarui</dt>
-                  <dd>{formatDateTime(prompt.updatedAt)}</dd>
+                  <dd className="mt-1 inline-flex items-center gap-1">
+                    <RefreshCwIcon aria-hidden="true" className="size-4" />
+                    {formatDateTime(prompt.updatedAt)}
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -105,6 +122,7 @@ export default async function PromptDetailPage({ params }: PromptDetailPageProps
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button asChild className="rounded-full">
                     <Link href={`/dashboard/prompts/${prompt.id}/edit`}>
+                      <PencilIcon aria-hidden="true" />
                       Edit
                     </Link>
                   </Button>

@@ -1,4 +1,11 @@
 import Link from "next/link";
+import {
+  ArrowUpRightIcon,
+  CalendarDaysIcon,
+  Globe2Icon,
+  LockKeyholeIcon,
+  PencilIcon,
+} from "lucide-react";
 
 import { DeletePromptDialog } from "@/components/prompts/delete-prompt-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -12,14 +19,25 @@ type MyPromptCardProps = {
 
 export function MyPromptCard({ prompt }: MyPromptCardProps) {
   return (
-    <article className="grid gap-5 rounded-2xl border bg-card p-5 text-card-foreground lg:grid-cols-[1fr_auto] lg:items-center">
+    <article
+      className="grid gap-5 rounded-2xl border bg-card p-5 text-card-foreground lg:grid-cols-[1fr_auto] lg:items-center"
+      data-motion="card"
+    >
       <div className="min-w-0 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">{prompt.category}</Badge>
           <Badge variant={prompt.visibility === "public" ? "default" : "outline"}>
+            {prompt.visibility === "public" ? (
+              <Globe2Icon aria-hidden="true" />
+            ) : (
+              <LockKeyholeIcon aria-hidden="true" />
+            )}
             {prompt.visibility === "public" ? "Public" : "Private"}
           </Badge>
-          <span className="text-sm">{formatDate(prompt.createdAt)}</span>
+          <span className="inline-flex items-center gap-1 text-sm">
+            <CalendarDaysIcon aria-hidden="true" className="size-4" />
+            {formatDate(prompt.createdAt)}
+          </span>
         </div>
         <div>
           <h2 className="text-2xl font-medium tracking-tight">{prompt.title}</h2>
@@ -40,10 +58,16 @@ export function MyPromptCard({ prompt }: MyPromptCardProps) {
 
       <div className="flex flex-wrap gap-2 lg:justify-end">
         <Button asChild className="rounded-full" variant="secondary">
-          <Link href={`/prompts/${prompt.id}`}>Lihat</Link>
+          <Link href={`/prompts/${prompt.id}`}>
+            Lihat
+            <ArrowUpRightIcon aria-hidden="true" />
+          </Link>
         </Button>
         <Button asChild className="rounded-full">
-          <Link href={`/dashboard/prompts/${prompt.id}/edit`}>Edit</Link>
+          <Link href={`/dashboard/prompts/${prompt.id}/edit`}>
+            <PencilIcon aria-hidden="true" />
+            Edit
+          </Link>
         </Button>
         <DeletePromptDialog promptId={prompt.id} />
       </div>

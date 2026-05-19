@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  EyeIcon,
+  FileTextIcon,
+  ListIcon,
+  TagsIcon,
+  TypeIcon,
+} from "lucide-react";
 import { useActionState } from "react";
 
 import { SubmitButton } from "@/components/auth/submit-button";
@@ -57,7 +64,10 @@ export function PromptForm({ prompt }: PromptFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="title">Judul</Label>
+          <Label htmlFor="title">
+            <TypeIcon aria-hidden="true" />
+            Judul
+          </Label>
           <Input
             defaultValue={defaultValues.title}
             id="title"
@@ -71,7 +81,10 @@ export function PromptForm({ prompt }: PromptFormProps) {
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="description">Deskripsi</Label>
+          <Label htmlFor="description">
+            <FileTextIcon aria-hidden="true" />
+            Deskripsi
+          </Label>
           <Textarea
             defaultValue={defaultValues.description}
             id="description"
@@ -83,7 +96,10 @@ export function PromptForm({ prompt }: PromptFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="category">Kategori</Label>
+          <Label htmlFor="category">
+            <ListIcon aria-hidden="true" />
+            Kategori
+          </Label>
           <select
             className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             defaultValue={defaultValues.category}
@@ -104,7 +120,10 @@ export function PromptForm({ prompt }: PromptFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="visibility">Visibility</Label>
+          <Label htmlFor="visibility">
+            <EyeIcon aria-hidden="true" />
+            Visibility
+          </Label>
           <select
             className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             defaultValue={defaultValues.visibility}
@@ -119,7 +138,10 @@ export function PromptForm({ prompt }: PromptFormProps) {
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="tags">Tags</Label>
+          <Label htmlFor="tags">
+            <TagsIcon aria-hidden="true" />
+            Tags
+          </Label>
           <Input
             defaultValue={defaultValues.tags}
             id="tags"
@@ -135,7 +157,10 @@ export function PromptForm({ prompt }: PromptFormProps) {
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="content">Isi prompt</Label>
+          <Label htmlFor="content">
+            <FileTextIcon aria-hidden="true" />
+            Isi prompt
+          </Label>
           <Textarea
             className="min-h-56 font-mono text-sm"
             defaultValue={defaultValues.content}

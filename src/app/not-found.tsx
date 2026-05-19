@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,10 @@ export default function NotFoundPage() {
         <EmptyState
           action={
             <Button asChild className="rounded-full">
-              <Link href="/">Kembali ke beranda</Link>
+              <Link href="/">
+                <HomeIcon aria-hidden="true" />
+                Kembali ke beranda
+              </Link>
             </Button>
           }
           description="Konten yang kamu cari tidak ditemukan atau kamu tidak memiliki akses."

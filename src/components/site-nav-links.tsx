@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  CompassIcon,
+  HomeIcon,
+  LayoutDashboardIcon,
+  LibraryIcon,
+  LogInIcon,
+  SettingsIcon,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -48,11 +57,13 @@ function getActiveKey(pathname: string): NavKey | null {
 function NavButton({
   activeKey,
   href,
+  icon: Icon,
   label,
   navKey,
 }: {
   activeKey: NavKey | null;
   href: string;
+  icon: LucideIcon;
   label: string;
   navKey: NavKey;
 }) {
@@ -65,6 +76,7 @@ function NavButton({
       variant={isActive ? "default" : "ghost"}
     >
       <Link aria-current={isActive ? "page" : undefined} href={href}>
+        <Icon aria-hidden="true" />
         {label}
       </Link>
     </Button>
@@ -80,12 +92,14 @@ export function SiteNavLinks({ isAuthenticated }: SiteNavLinksProps) {
       <NavButton
         activeKey={activeKey}
         href="/"
+        icon={HomeIcon}
         label="Beranda"
         navKey="home"
       />
       <NavButton
         activeKey={activeKey}
         href="/prompts"
+        icon={CompassIcon}
         label="Jelajahi Prompt"
         navKey="prompts"
       />
@@ -94,18 +108,21 @@ export function SiteNavLinks({ isAuthenticated }: SiteNavLinksProps) {
           <NavButton
             activeKey={activeKey}
             href="/dashboard"
+            icon={LayoutDashboardIcon}
             label="Dashboard"
             navKey="dashboard"
           />
           <NavButton
             activeKey={activeKey}
             href="/dashboard/prompts"
+            icon={LibraryIcon}
             label="Prompt saya"
             navKey="my-prompts"
           />
           <NavButton
             activeKey={activeKey}
             href="/settings"
+            icon={SettingsIcon}
             label="Settings"
             navKey="settings"
           />
@@ -114,6 +131,7 @@ export function SiteNavLinks({ isAuthenticated }: SiteNavLinksProps) {
         <NavButton
           activeKey={activeKey}
           href="/login"
+          icon={LogInIcon}
           label="Login"
           navKey="login"
         />

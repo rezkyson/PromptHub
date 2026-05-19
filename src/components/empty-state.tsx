@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { InboxIcon, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -7,6 +8,7 @@ type EmptyStateProps = {
   description?: string;
   action?: ReactNode;
   className?: string;
+  icon?: LucideIcon;
 };
 
 export function EmptyState({
@@ -14,6 +16,7 @@ export function EmptyState({
   description,
   action,
   className,
+  icon: Icon = InboxIcon,
 }: EmptyStateProps) {
   return (
     <div
@@ -23,6 +26,9 @@ export function EmptyState({
       )}
     >
       <div className="mx-auto max-w-lg space-y-4">
+        <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-background/70">
+          <Icon aria-hidden="true" className="size-5" />
+        </div>
         <h2 className="text-2xl font-medium tracking-tight sm:text-3xl">
           {title}
         </h2>

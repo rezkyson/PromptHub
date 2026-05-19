@@ -1,11 +1,16 @@
 "use client"
 
+import gsap from "gsap"
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
+
+function shouldReduceMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+}
 
 function Dialog({
   ...props
@@ -35,8 +40,32 @@ function DialogOverlay({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+  const overlayRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!overlayRef.current || shouldReduceMotion()) {
+      return
+    }
+
+    const context = gsap.context(() => {
+      gsap.fromTo(
+        overlayRef.current,
+        { autoAlpha: 0 },
+        {
+          autoAlpha: 1,
+          clearProps: "opacity,visibility",
+          duration: 0.18,
+          ease: "power2.out",
+        }
+      )
+    }, overlayRef)
+
+    return () => context.revert()
+  }, [])
+
   return (
     <DialogPrimitive.Overlay
+      ref={overlayRef}
       data-slot="dialog-overlay"
       className={cn(
         "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
@@ -55,10 +84,37 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const contentRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!contentRef.current || shouldReduceMotion()) {
+      return
+    }
+
+    const context = gsap.context(() => {
+      gsap.fromTo(
+        contentRef.current,
+        { autoAlpha: 0, scale: 0.97, xPercent: -50, yPercent: -48 },
+        {
+          autoAlpha: 1,
+          clearProps: "opacity,visibility,scale",
+          duration: 0.24,
+          ease: "power2.out",
+          scale: 1,
+          xPercent: -50,
+          yPercent: -50,
+        }
+      )
+    }, contentRef)
+
+    return () => context.revert()
+  }, [])
+
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
+        ref={contentRef}
         data-slot="dialog-content"
         className={cn(
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
