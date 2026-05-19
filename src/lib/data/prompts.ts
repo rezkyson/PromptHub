@@ -28,7 +28,38 @@ export async function getPublicPrompts(filters: PromptListFilters = {}) {
   const { from, to } = normalizePagination(filters);
   let query = supabase
     .from("prompts")
-    .select("*")
+    .select("*, profiles(*)")
+    .eq("visibility", "public")
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (filters.search?.trim()) {
+    query = query.ilike("title", `%${filters.search.trim()}%`);
+  }
+
+  if (filters.category) {
+    query = query.eq("category", filters.category);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data.map(mapPromptRow);
+}
+
+export async function getPublicPromptsByUserId(
+  userId: string,
+  filters: PromptListFilters = {}
+) {
+  const supabase = await createSupabaseServerClient();
+  const { from, to } = normalizePagination(filters);
+  let query = supabase
+    .from("prompts")
+    .select("*, profiles(*)")
+    .eq("user_id", userId)
     .eq("visibility", "public")
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -54,7 +85,7 @@ export async function getPromptById(id: string) {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompts")
-    .select("*")
+    .select("*, profiles(*)")
     .eq("id", id)
     .single();
 
@@ -137,6 +168,17 @@ export async function getUserPromptStats(userId: string) {
 export function toPromptInsert(userId: string, values: PromptFormValues) {
   return {
     user_id: userId,
+    title: values.title.trim(),
+    description: values.description?.trim() || null,
+    category: values.category,
+    tags: normalizeTags(values.tags),
+    content: values.content.trim(),
+    visibility: values.visibility || DEFAULT_PROMPT_VISIBILITY,
+  };
+}
+
+export function toPromptUpdate(values: PromptFormValues) {
+  return {
     title: values.title.trim(),
     description: values.description?.trim() || null,
     category: values.category,

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:smoke": "node scripts/smoke-security.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

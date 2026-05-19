@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CopyPromptButton } from "@/components/prompts/copy-prompt-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/formatters";
@@ -11,11 +12,25 @@ type PromptCardProps = {
   href?: string;
 };
 
+function getPromptAuthorName(prompt: Prompt, fallback: string) {
+  if (prompt.author?.displayName) {
+    return prompt.author.displayName;
+  }
+
+  if (prompt.author?.username) {
+    return `@${prompt.author.username}`;
+  }
+
+  return fallback;
+}
+
 export function PromptCard({
   prompt,
   authorName = "Pengguna PromptHub",
   href = `/prompts/${prompt.id}`,
 }: PromptCardProps) {
+  const displayAuthorName = getPromptAuthorName(prompt, authorName);
+
   return (
     <article className="flex h-full flex-col gap-5 rounded-2xl border bg-card p-5 text-card-foreground">
       <div className="flex flex-wrap items-center gap-2">
@@ -43,11 +58,14 @@ export function PromptCard({
       ) : null}
       <div className="flex flex-col gap-4 border-t pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
         <p>
-          {authorName} - {formatDate(prompt.createdAt)}
+          {displayAuthorName} - {formatDate(prompt.createdAt)}
         </p>
-        <Button asChild className="rounded-full">
-          <Link href={href}>Lihat detail</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <CopyPromptButton content={prompt.content} label="Copy" />
+          <Button asChild className="rounded-full" variant="secondary">
+            <Link href={href}>Detail</Link>
+          </Button>
+        </div>
       </div>
     </article>
   );

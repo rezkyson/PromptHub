@@ -16,7 +16,7 @@ export default async function DashboardLayout({
 
   return (
     <main className="min-h-dvh bg-background text-foreground">
-      <SiteHeader variant="dashboard" />
+      <SiteHeader />
       {children}
     </main>
   );

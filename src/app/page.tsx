@@ -57,12 +57,7 @@ export default async function Home() {
 
           {publicPrompts.length > 0 ? (
             publicPrompts.map((prompt) => (
-              <PromptCard
-                authorName="Pengguna PromptHub"
-                href="/prompts"
-                key={prompt.id}
-                prompt={prompt}
-              />
+              <PromptCard key={prompt.id} prompt={prompt} />
             ))
           ) : (
             <EmptyState

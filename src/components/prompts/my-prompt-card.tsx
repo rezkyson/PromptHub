@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { DeletePromptDialog } from "@/components/prompts/delete-prompt-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/formatters";
@@ -44,14 +45,7 @@ export function MyPromptCard({ prompt }: MyPromptCardProps) {
         <Button asChild className="rounded-full">
           <Link href={`/dashboard/prompts/${prompt.id}/edit`}>Edit</Link>
         </Button>
-        <Button
-          className="rounded-full"
-          disabled
-          title="Aksi hapus dibuat pada Phase 10"
-          variant="secondary"
-        >
-          Hapus
-        </Button>
+        <DeletePromptDialog promptId={prompt.id} />
       </div>
     </article>
   );

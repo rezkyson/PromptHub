@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PROMPT_CATEGORIES } from "@/lib/constants/prompts";
+import { initialPromptActionState } from "@/lib/prompts/form-state";
 import {
   createPromptAction,
-  initialCreatePromptState,
+  updatePromptAction,
 } from "@/lib/prompts/actions";
+import type { Prompt } from "@/types/prompt";
 
 function FieldError({ message }: { message?: string }) {
   if (!message) {
@@ -21,17 +23,32 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-sm text-destructive">{message}</p>;
 }
 
-export function PromptForm() {
+type PromptFormProps = {
+  prompt?: Prompt;
+};
+
+export function PromptForm({ prompt }: PromptFormProps) {
+  const isEditMode = Boolean(prompt);
   const [state, formAction] = useActionState(
-    createPromptAction,
-    initialCreatePromptState
+    isEditMode ? updatePromptAction : createPromptAction,
+    initialPromptActionState
   );
+  const defaultValues = {
+    title: state.values?.title ?? prompt?.title,
+    description: state.values?.description ?? prompt?.description ?? "",
+    category: state.values?.category ?? prompt?.category ?? "",
+    tags: state.values?.tags ?? prompt?.tags.join(", ") ?? "",
+    content: state.values?.content ?? prompt?.content,
+    visibility: state.values?.visibility ?? prompt?.visibility ?? "private",
+  };
 
   return (
     <form
       action={formAction}
       className="space-y-6 rounded-3xl border bg-card p-6 text-card-foreground sm:p-8"
     >
+      {prompt ? <input name="id" type="hidden" value={prompt.id} /> : null}
+
       {state.message ? (
         <div className="rounded-2xl bg-block-coral px-4 py-3 text-sm" role="alert">
           {state.message}
@@ -42,7 +59,7 @@ export function PromptForm() {
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="title">Judul</Label>
           <Input
-            defaultValue={state.values?.title}
+            defaultValue={defaultValues.title}
             id="title"
             maxLength={100}
             minLength={3}
@@ -56,7 +73,7 @@ export function PromptForm() {
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="description">Deskripsi</Label>
           <Textarea
-            defaultValue={state.values?.description}
+            defaultValue={defaultValues.description}
             id="description"
             maxLength={300}
             name="description"
@@ -69,7 +86,7 @@ export function PromptForm() {
           <Label htmlFor="category">Kategori</Label>
           <select
             className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            defaultValue={state.values?.category ?? ""}
+            defaultValue={defaultValues.category}
             id="category"
             name="category"
             required
@@ -90,7 +107,7 @@ export function PromptForm() {
           <Label htmlFor="visibility">Visibility</Label>
           <select
             className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            defaultValue={state.values?.visibility ?? "private"}
+            defaultValue={defaultValues.visibility}
             id="visibility"
             name="visibility"
             required
@@ -104,7 +121,7 @@ export function PromptForm() {
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="tags">Tags</Label>
           <Input
-            defaultValue={state.values?.tags}
+            defaultValue={defaultValues.tags}
             id="tags"
             name="tags"
             placeholder="coding, review, react"
@@ -121,7 +138,7 @@ export function PromptForm() {
           <Label htmlFor="content">Isi prompt</Label>
           <Textarea
             className="min-h-56 font-mono text-sm"
-            defaultValue={state.values?.content}
+            defaultValue={defaultValues.content}
             id="content"
             maxLength={10000}
             minLength={10}
@@ -133,7 +150,9 @@ export function PromptForm() {
         </div>
       </div>
 
-      <SubmitButton pendingLabel="Menyimpan...">Simpan prompt</SubmitButton>
+      <SubmitButton pendingLabel="Menyimpan...">
+        {isEditMode ? "Simpan perubahan" : "Simpan prompt"}
+      </SubmitButton>
     </form>
   );
 }

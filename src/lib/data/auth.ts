@@ -32,3 +32,18 @@ export async function getCurrentProfile() {
 
   return mapProfileRow(data);
 }
+
+export async function getProfileByUsername(username: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("username", username)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return mapProfileRow(data);
+}

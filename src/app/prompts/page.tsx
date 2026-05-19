@@ -1,15 +1,34 @@
-import Link from "next/link";
-
-import { EmptyState } from "@/components/empty-state";
-import { PromptCard } from "@/components/prompt-card";
+import { PublicPromptBrowser } from "@/components/prompts/prompt-browsers";
 import { SiteHeader } from "@/components/site-header";
-import { Button } from "@/components/ui/button";
+import { PROMPT_CATEGORIES } from "@/lib/constants/prompts";
 import { getPublicPrompts } from "@/lib/data/prompts";
+import type { PromptCategory } from "@/types/prompt";
 
 export const dynamic = "force-dynamic";
 
-export default async function PromptsPage() {
-  const prompts = await getPublicPrompts({ limit: 12 });
+type PromptsPageProps = {
+  searchParams: Promise<{
+    category?: string;
+    search?: string;
+  }>;
+};
+
+function toCategoryFilter(value: string | undefined) {
+  if (PROMPT_CATEGORIES.includes(value as PromptCategory)) {
+    return value as PromptCategory;
+  }
+
+  return "";
+}
+
+export default async function PromptsPage({ searchParams }: PromptsPageProps) {
+  const { category, search } = await searchParams;
+  const categoryFilter = toCategoryFilter(category);
+  const prompts = await getPublicPrompts({
+    category: categoryFilter,
+    limit: 12,
+    search,
+  });
 
   return (
     <main className="min-h-dvh bg-background text-foreground">
@@ -25,29 +44,12 @@ export default async function PromptsPage() {
           </h1>
         </div>
 
-        {prompts.length > 0 ? (
-          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {prompts.map((prompt) => (
-              <PromptCard
-                authorName="Pengguna PromptHub"
-                href="/prompts"
-                key={prompt.id}
-                prompt={prompt}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            action={
-              <Button asChild className="rounded-full">
-                <Link href="/register">Register</Link>
-              </Button>
-            }
-            className="mt-8"
-            description="Jadilah yang pertama membagikan prompt."
-            title="Belum ada prompt publik."
-          />
-        )}
+        <PublicPromptBrowser
+          initialCategory={categoryFilter}
+          initialPrompts={prompts}
+          initialSearch={search}
+          mode="public"
+        />
       </section>
     </main>
   );

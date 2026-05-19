@@ -2,8 +2,17 @@ import {
   PROMPT_CATEGORIES,
   PROMPT_VISIBILITIES,
 } from "@/lib/constants/prompts";
-import type { Profile, Prompt, PromptCategory, PromptVisibility } from "@/types/prompt";
+import type {
+  Profile,
+  Prompt,
+  PromptCategory,
+  PromptVisibility,
+} from "@/types/prompt";
 import type { ProfileRow, PromptRow } from "@/types/database";
+
+type PromptRowWithProfile = PromptRow & {
+  profiles?: ProfileRow | ProfileRow[] | null;
+};
 
 function toPromptCategory(value: string): PromptCategory {
   if (PROMPT_CATEGORIES.includes(value as PromptCategory)) {
@@ -33,10 +42,17 @@ export function mapProfileRow(row: ProfileRow): Profile {
   };
 }
 
-export function mapPromptRow(row: PromptRow): Prompt {
+function mapPromptAuthor(row: PromptRowWithProfile) {
+  const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+
+  return profile ? mapProfileRow(profile) : null;
+}
+
+export function mapPromptRow(row: PromptRowWithProfile): Prompt {
   return {
     id: row.id,
     userId: row.user_id,
+    author: mapPromptAuthor(row),
     title: row.title,
     description: row.description,
     category: toPromptCategory(row.category),

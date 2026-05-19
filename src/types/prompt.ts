@@ -20,6 +20,7 @@ export type Profile = {
 export type Prompt = {
   id: string;
   userId: string;
+  author: Profile | null;
   title: string;
   description: string | null;
   category: PromptCategory;

@@ -15,7 +15,7 @@ function isAuthPath(pathname: string) {
   return authPaths.includes(pathname);
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request,
   });
@@ -47,7 +47,10 @@ export async function middleware(request: NextRequest) {
   if (!user && isProtectedPath(pathname)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("error", "Silakan login untuk membuka halaman ini.");
+    redirectUrl.searchParams.set(
+      "error",
+      "Silakan login untuk membuka halaman ini.",
+    );
 
     return NextResponse.redirect(redirectUrl);
   }

@@ -1,15 +1,12 @@
 import Link from "next/link";
 
+import { SiteNavLinks } from "@/components/site-nav-links";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/lib/auth/actions";
 import { getCurrentUser } from "@/lib/data/auth";
 
-type SiteHeaderProps = {
-  variant?: "public" | "dashboard";
-};
-
-export async function SiteHeader({ variant = "public" }: SiteHeaderProps) {
+export async function SiteHeader() {
   const user = await getCurrentUser();
 
   return (
@@ -35,32 +32,7 @@ export async function SiteHeader({ variant = "public" }: SiteHeaderProps) {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button asChild className="rounded-full" variant="ghost">
-            <Link href="/">Beranda</Link>
-          </Button>
-          <Button asChild className="rounded-full" variant="ghost">
-            <Link href="/prompts">Jelajahi Prompt</Link>
-          </Button>
-          {user ? (
-            <>
-              <Button
-                asChild
-                className="rounded-full"
-                variant={variant === "dashboard" ? "default" : "secondary"}
-              >
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <Button asChild className="rounded-full" variant="secondary">
-                <Link href="/dashboard/prompts">Prompt saya</Link>
-              </Button>
-            </>
-          ) : (
-            <Button asChild className="rounded-full" variant="secondary">
-              <Link href="/login">Login</Link>
-            </Button>
-          )}
-        </div>
+        <SiteNavLinks isAuthenticated={Boolean(user)} />
       </nav>
     </header>
   );
