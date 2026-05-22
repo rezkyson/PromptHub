@@ -74,7 +74,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
             <Input
               autoComplete="new-password"
               id="password"
-              minLength={6}
+              minLength={8}
               name="password"
               required
               type="password"

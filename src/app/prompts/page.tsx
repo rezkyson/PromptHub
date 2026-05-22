@@ -1,6 +1,7 @@
 import { PublicPromptBrowser } from "@/components/prompts/prompt-browsers";
 import { SiteHeader } from "@/components/site-header";
 import { PROMPT_CATEGORIES } from "@/lib/constants/prompts";
+import { getCurrentUser } from "@/lib/data/auth";
 import { getPublicPrompts } from "@/lib/data/prompts";
 import type { PromptCategory } from "@/types/prompt";
 
@@ -24,11 +25,14 @@ function toCategoryFilter(value: string | undefined) {
 export default async function PromptsPage({ searchParams }: PromptsPageProps) {
   const { category, search } = await searchParams;
   const categoryFilter = toCategoryFilter(category);
-  const prompts = await getPublicPrompts({
-    category: categoryFilter,
-    limit: 12,
-    search,
-  });
+  const [user, prompts] = await Promise.all([
+    getCurrentUser(),
+    getPublicPrompts({
+      category: categoryFilter,
+      limit: 12,
+      search,
+    }),
+  ]);
 
   return (
     <main className="min-h-dvh bg-background text-foreground">
@@ -48,6 +52,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
           initialCategory={categoryFilter}
           initialPrompts={prompts}
           initialSearch={search}
+          isAuthenticated={Boolean(user)}
           mode="public"
         />
       </section>

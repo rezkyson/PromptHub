@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 
 import { DeletePromptDialog } from "@/components/prompts/delete-prompt-dialog";
 import { CopyPromptButton } from "@/components/prompts/copy-prompt-button";
+import { FavoritePromptButton } from "@/components/prompts/favorite-prompt-button";
 import { SiteHeader } from "@/components/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -83,7 +84,16 @@ export default async function PromptDetailPage({ params }: PromptDetailPageProps
                   Author: {authorName}
                 </p>
               </div>
-              <CopyPromptButton content={prompt.content} />
+              <div className="flex flex-wrap gap-2">
+                {prompt.visibility === "public" ? (
+                  <FavoritePromptButton
+                    isAuthenticated={Boolean(user)}
+                    isFavorited={prompt.isFavorited}
+                    promptId={prompt.id}
+                  />
+                ) : null}
+                <CopyPromptButton content={prompt.content} />
+              </div>
             </div>
 
             <pre className="whitespace-pre-wrap break-words rounded-2xl bg-muted p-4 font-mono text-sm leading-7">

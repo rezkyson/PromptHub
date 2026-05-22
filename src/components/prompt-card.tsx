@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { CopyPromptButton } from "@/components/prompts/copy-prompt-button";
+import { FavoritePromptButton } from "@/components/prompts/favorite-prompt-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/formatters";
@@ -17,6 +18,7 @@ type PromptCardProps = {
   prompt: Prompt;
   authorName?: string;
   href?: string;
+  isAuthenticated?: boolean;
 };
 
 function getPromptAuthorName(prompt: Prompt, fallback: string) {
@@ -35,6 +37,7 @@ export function PromptCard({
   prompt,
   authorName = "Pengguna PromptHub",
   href = `/prompts/${prompt.id}`,
+  isAuthenticated = false,
 }: PromptCardProps) {
   const displayAuthorName = getPromptAuthorName(prompt, authorName);
 
@@ -71,8 +74,8 @@ export function PromptCard({
           ))}
         </div>
       ) : null}
-      <div className="flex flex-col gap-4 border-t pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <div className="grid gap-4 border-t pt-4 text-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+        <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
           <span className="inline-flex items-center gap-1">
             <UserRoundIcon aria-hidden="true" className="size-4" />
             {displayAuthorName}
@@ -83,11 +86,25 @@ export function PromptCard({
             {formatDate(prompt.createdAt)}
           </span>
         </p>
-        <div className="flex flex-wrap gap-2">
-          <CopyPromptButton content={prompt.content} label="Copy" />
-          <Button asChild className="rounded-full" variant="secondary">
+        <div className="flex shrink-0 items-center gap-2">
+          {prompt.visibility === "public" ? (
+            <FavoritePromptButton
+              iconOnly
+              isAuthenticated={isAuthenticated}
+              isFavorited={prompt.isFavorited}
+              promptId={prompt.id}
+            />
+          ) : null}
+          <CopyPromptButton content={prompt.content} iconOnly label="Copy" />
+          <Button
+            asChild
+            aria-label="Lihat detail prompt"
+            className="rounded-full"
+            size="icon-lg"
+            title="Lihat detail prompt"
+            variant="secondary"
+          >
             <Link href={href}>
-              Detail
               <ArrowUpRightIcon aria-hidden="true" />
             </Link>
           </Button>

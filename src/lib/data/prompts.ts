@@ -1,4 +1,6 @@
 import { DEFAULT_PROMPT_VISIBILITY } from "@/lib/constants/prompts";
+import { getCurrentUser } from "@/lib/data/auth";
+import { attachFavoriteState } from "@/lib/data/favorites";
 import { normalizeTags } from "@/lib/tags";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { mapPromptRow } from "@/lib/supabase/mappers";
@@ -28,7 +30,7 @@ export async function getPublicPrompts(filters: PromptListFilters = {}) {
   const { from, to } = normalizePagination(filters);
   let query = supabase
     .from("prompts")
-    .select("*, profiles(*)")
+    .select("*, profiles!prompts_user_id_fkey(*)")
     .eq("visibility", "public")
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -47,7 +49,9 @@ export async function getPublicPrompts(filters: PromptListFilters = {}) {
     throw new Error(error.message);
   }
 
-  return data.map(mapPromptRow);
+  const user = await getCurrentUser();
+
+  return attachFavoriteState(data.map(mapPromptRow), user?.id);
 }
 
 export async function getPublicPromptsByUserId(
@@ -58,7 +62,7 @@ export async function getPublicPromptsByUserId(
   const { from, to } = normalizePagination(filters);
   let query = supabase
     .from("prompts")
-    .select("*, profiles(*)")
+    .select("*, profiles!prompts_user_id_fkey(*)")
     .eq("user_id", userId)
     .eq("visibility", "public")
     .order("created_at", { ascending: false })
@@ -78,14 +82,16 @@ export async function getPublicPromptsByUserId(
     throw new Error(error.message);
   }
 
-  return data.map(mapPromptRow);
+  const user = await getCurrentUser();
+
+  return attachFavoriteState(data.map(mapPromptRow), user?.id);
 }
 
 export async function getPromptById(id: string) {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompts")
-    .select("*, profiles(*)")
+    .select("*, profiles!prompts_user_id_fkey(*)")
     .eq("id", id)
     .single();
 
@@ -93,7 +99,10 @@ export async function getPromptById(id: string) {
     return null;
   }
 
-  return mapPromptRow(data);
+  const user = await getCurrentUser();
+  const [prompt] = await attachFavoriteState([mapPromptRow(data)], user?.id);
+
+  return prompt;
 }
 
 export async function getUserPrompts(

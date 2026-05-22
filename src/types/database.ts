@@ -86,6 +86,39 @@ export type Database = {
           },
         ];
       };
+      prompt_favorites: {
+        Row: {
+          user_id: string;
+          prompt_id: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          prompt_id: string;
+          created_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          prompt_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "prompt_favorites_prompt_id_fkey";
+            columns: ["prompt_id"];
+            isOneToOne: false;
+            referencedRelation: "prompts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "prompt_favorites_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -112,6 +145,9 @@ export type Database = {
 };
 
 export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+export type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
+export type PromptFavoriteRow =
+  Database["public"]["Tables"]["prompt_favorites"]["Row"];
 export type PromptRow = Database["public"]["Tables"]["prompts"]["Row"];
 export type PromptInsert = Database["public"]["Tables"]["prompts"]["Insert"];
 export type PromptUpdate = Database["public"]["Tables"]["prompts"]["Update"];

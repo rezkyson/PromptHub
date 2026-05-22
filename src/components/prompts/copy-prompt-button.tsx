@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 
 type CopyPromptButtonProps = {
   content: string;
+  iconOnly?: boolean;
   label?: string;
 };
 
 export function CopyPromptButton({
   content,
+  iconOnly,
   label = "Copy prompt",
 }: CopyPromptButtonProps) {
   async function handleCopy() {
@@ -33,10 +35,12 @@ export function CopyPromptButton({
       aria-label={label}
       className="rounded-full"
       onClick={handleCopy}
+      size={iconOnly ? "icon-lg" : "default"}
+      title={label}
       type="button"
     >
       <CopyIcon />
-      {label}
+      {iconOnly ? null : label}
     </Button>
   );
 }

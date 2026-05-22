@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { EmptyState } from "@/components/empty-state";
 import { PromptCard } from "@/components/prompt-card";
 import { SiteHeader } from "@/components/site-header";
-import { getProfileByUsername } from "@/lib/data/auth";
+import { getCurrentUser, getProfileByUsername } from "@/lib/data/auth";
 import { getPublicPromptsByUserId } from "@/lib/data/prompts";
 import { formatDate } from "@/lib/formatters";
 
@@ -23,7 +23,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     notFound();
   }
 
-  const prompts = await getPublicPromptsByUserId(profile.id, { limit: 12 });
+  const [user, prompts] = await Promise.all([
+    getCurrentUser(),
+    getPublicPromptsByUserId(profile.id, { limit: 12 }),
+  ]);
   const displayName = profile.displayName || profile.username || "Pengguna PromptHub";
 
   return (
@@ -49,6 +52,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             {prompts.map((prompt) => (
               <PromptCard
                 authorName={displayName}
+                isAuthenticated={Boolean(user)}
                 key={prompt.id}
                 prompt={prompt}
               />

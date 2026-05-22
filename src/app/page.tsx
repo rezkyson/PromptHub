@@ -10,9 +10,11 @@ import {
 
 import { EmptyState } from "@/components/empty-state";
 import { CopyPromptButton } from "@/components/prompts/copy-prompt-button";
+import { FavoritePromptButton } from "@/components/prompts/favorite-prompt-button";
 import { SiteHeader } from "@/components/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/lib/data/auth";
 import { getPublicPrompts } from "@/lib/data/prompts";
 import { formatDate } from "@/lib/formatters";
 import type { Prompt } from "@/types/prompt";
@@ -31,7 +33,13 @@ function getPromptAuthorName(prompt: Prompt) {
   return "Pengguna PromptHub";
 }
 
-function HomePromptPreviewCard({ prompt }: { prompt: Prompt }) {
+function HomePromptPreviewCard({
+  isAuthenticated,
+  prompt,
+}: {
+  isAuthenticated: boolean;
+  prompt: Prompt;
+}) {
   const visibleTags = prompt.tags.slice(0, 3);
 
   return (
@@ -74,10 +82,22 @@ function HomePromptPreviewCard({ prompt }: { prompt: Prompt }) {
           {getPromptAuthorName(prompt)}
         </p>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <CopyPromptButton content={prompt.content} label="Copy" />
-          <Button asChild className="rounded-full" variant="secondary">
+          <FavoritePromptButton
+            iconOnly
+            isAuthenticated={isAuthenticated}
+            isFavorited={prompt.isFavorited}
+            promptId={prompt.id}
+          />
+          <CopyPromptButton content={prompt.content} iconOnly label="Copy" />
+          <Button
+            asChild
+            aria-label="Lihat detail prompt"
+            className="rounded-full"
+            size="icon-lg"
+            title="Lihat detail prompt"
+            variant="secondary"
+          >
             <Link href={`/prompts/${prompt.id}`}>
-              Detail
               <ArrowUpRightIcon aria-hidden="true" />
             </Link>
           </Button>
@@ -88,7 +108,10 @@ function HomePromptPreviewCard({ prompt }: { prompt: Prompt }) {
 }
 
 export default async function Home() {
-  const publicPrompts = await getPublicPrompts({ limit: 6 });
+  const [user, publicPrompts] = await Promise.all([
+    getCurrentUser(),
+    getPublicPrompts({ limit: 6 }),
+  ]);
 
   return (
     <main className="flex min-h-dvh flex-col bg-background text-foreground">
@@ -165,7 +188,11 @@ export default async function Home() {
         {publicPrompts.length > 0 ? (
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {publicPrompts.map((prompt) => (
-              <HomePromptPreviewCard key={prompt.id} prompt={prompt} />
+              <HomePromptPreviewCard
+                isAuthenticated={Boolean(user)}
+                key={prompt.id}
+                prompt={prompt}
+              />
             ))}
           </div>
         ) : (

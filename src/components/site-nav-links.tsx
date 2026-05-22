@@ -3,6 +3,7 @@
 import {
   CompassIcon,
   HomeIcon,
+  HeartIcon,
   LayoutDashboardIcon,
   LibraryIcon,
   LogInIcon,
@@ -22,6 +23,7 @@ type NavKey =
   | "home"
   | "prompts"
   | "dashboard"
+  | "favorites"
   | "my-prompts"
   | "settings"
   | "login";
@@ -33,6 +35,10 @@ function getActiveKey(pathname: string): NavKey | null {
 
   if (pathname.startsWith("/dashboard/prompts")) {
     return "my-prompts";
+  }
+
+  if (pathname.startsWith("/dashboard/favorites")) {
+    return "favorites";
   }
 
   if (pathname === "/dashboard") {
@@ -118,6 +124,13 @@ export function SiteNavLinks({ isAuthenticated }: SiteNavLinksProps) {
             icon={LibraryIcon}
             label="Prompt saya"
             navKey="my-prompts"
+          />
+          <NavButton
+            activeKey={activeKey}
+            href="/dashboard/favorites"
+            icon={HeartIcon}
+            label="Favorite"
+            navKey="favorites"
           />
           <NavButton
             activeKey={activeKey}

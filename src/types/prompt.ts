@@ -26,6 +26,7 @@ export type Prompt = {
   category: PromptCategory;
   tags: string[];
   content: string;
+  isFavorited?: boolean;
   visibility: PromptVisibility;
   createdAt: string;
   updatedAt: string;
