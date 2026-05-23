@@ -3,11 +3,8 @@
 import {
   CompassIcon,
   HomeIcon,
-  HeartIcon,
   LayoutDashboardIcon,
-  LibraryIcon,
   LogInIcon,
-  SettingsIcon,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -19,34 +16,15 @@ type SiteNavLinksProps = {
   isAuthenticated: boolean;
 };
 
-type NavKey =
-  | "home"
-  | "prompts"
-  | "dashboard"
-  | "favorites"
-  | "my-prompts"
-  | "settings"
-  | "login";
+type NavKey = "home" | "prompts" | "dashboard" | "login";
 
 function getActiveKey(pathname: string): NavKey | null {
   if (pathname === "/") {
     return "home";
   }
 
-  if (pathname.startsWith("/dashboard/prompts")) {
-    return "my-prompts";
-  }
-
-  if (pathname.startsWith("/dashboard/favorites")) {
-    return "favorites";
-  }
-
-  if (pathname === "/dashboard") {
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/settings")) {
     return "dashboard";
-  }
-
-  if (pathname.startsWith("/settings")) {
-    return "settings";
   }
 
   if (pathname.startsWith("/prompts")) {
@@ -110,36 +88,13 @@ export function SiteNavLinks({ isAuthenticated }: SiteNavLinksProps) {
         navKey="prompts"
       />
       {isAuthenticated ? (
-        <>
-          <NavButton
-            activeKey={activeKey}
-            href="/dashboard"
-            icon={LayoutDashboardIcon}
-            label="Dashboard"
-            navKey="dashboard"
-          />
-          <NavButton
-            activeKey={activeKey}
-            href="/dashboard/prompts"
-            icon={LibraryIcon}
-            label="Prompt saya"
-            navKey="my-prompts"
-          />
-          <NavButton
-            activeKey={activeKey}
-            href="/dashboard/favorites"
-            icon={HeartIcon}
-            label="Favorite"
-            navKey="favorites"
-          />
-          <NavButton
-            activeKey={activeKey}
-            href="/settings"
-            icon={SettingsIcon}
-            label="Settings"
-            navKey="settings"
-          />
-        </>
+        <NavButton
+          activeKey={activeKey}
+          href="/dashboard"
+          icon={LayoutDashboardIcon}
+          label="Dashboard"
+          navKey="dashboard"
+        />
       ) : (
         <NavButton
           activeKey={activeKey}

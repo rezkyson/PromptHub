@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { FileTextIcon, Globe2Icon, LockKeyholeIcon, PlusIcon } from "lucide-react";
+import {
+  CopyIcon,
+  FileTextIcon,
+  Globe2Icon,
+  LockKeyholeIcon,
+  PlusIcon,
+} from "lucide-react";
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { EmptyState } from "@/components/empty-state";
@@ -15,7 +21,7 @@ export default async function DashboardPage() {
   ]);
   const stats = user
     ? await getUserPromptStats(user.id)
-    : { total: 0, public: 0, private: 0, recentPrompts: [] };
+    : { copyCount: 0, total: 0, public: 0, private: 0, recentPrompts: [] };
 
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-12 sm:px-10 lg:px-12">
@@ -32,7 +38,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="mt-8 grid gap-5 md:grid-cols-3">
+      <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           description="Semua prompt yang kamu simpan."
           icon={FileTextIcon}
@@ -50,6 +56,12 @@ export default async function DashboardPage() {
           icon={LockKeyholeIcon}
           label="Private"
           value={stats.private}
+        />
+        <StatCard
+          description="Total akun unik yang pernah menyalin prompt kamu."
+          icon={CopyIcon}
+          label="Salinan"
+          value={stats.copyCount}
         />
       </div>
 

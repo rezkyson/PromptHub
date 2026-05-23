@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { DEFAULT_PROMPT_VISIBILITY } from "@/lib/constants/prompts";
+import { syncPromptCollections } from "@/lib/data/collections";
 import { getCurrentUser } from "@/lib/data/auth";
 import { toPromptInsert, toPromptUpdate } from "@/lib/data/prompts";
 import type { PromptActionState } from "@/lib/prompts/form-state";
@@ -14,6 +15,12 @@ function readFormValue(formData: FormData, key: string) {
   const value = formData.get(key);
 
   return typeof value === "string" ? value : "";
+}
+
+function readCollectionIds(formData: FormData) {
+  return formData
+    .getAll("collectionIds")
+    .filter((value): value is string => typeof value === "string" && Boolean(value));
 }
 
 export async function createPromptAction(
@@ -29,6 +36,7 @@ export async function createPromptAction(
     visibility:
       (readFormValue(formData, "visibility") as PromptVisibility) ||
       DEFAULT_PROMPT_VISIBILITY,
+    collectionIds: readCollectionIds(formData),
   };
   const validation = validatePromptForm(values);
 
@@ -48,14 +56,26 @@ export async function createPromptAction(
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("prompts").insert(toPromptInsert(user.id, values));
+  const { data, error } = await supabase
+    .from("prompts")
+    .insert(toPromptInsert(user.id, values))
+    .select("id")
+    .single();
 
-  if (error) {
+  if (error || !data) {
     return {
       status: "error",
       message: "Prompt gagal disimpan. Coba lagi sebentar.",
       values,
     };
+  }
+
+  try {
+    await syncPromptCollections(user.id, data.id, values.collectionIds);
+  } catch {
+    redirect(
+      "/dashboard/prompts?error=Prompt berhasil dibuat, tapi collection gagal diperbarui."
+    );
   }
 
   redirect("/dashboard/prompts?message=Prompt berhasil dibuat.");
@@ -75,6 +95,7 @@ export async function updatePromptAction(
     visibility:
       (readFormValue(formData, "visibility") as PromptVisibility) ||
       DEFAULT_PROMPT_VISIBILITY,
+    collectionIds: readCollectionIds(formData),
   };
   const validation = validatePromptForm(values);
 
@@ -116,6 +137,14 @@ export async function updatePromptAction(
       message: "Prompt gagal diperbarui atau kamu tidak punya akses.",
       values,
     };
+  }
+
+  try {
+    await syncPromptCollections(user.id, promptId, values.collectionIds);
+  } catch {
+    redirect(
+      "/dashboard/prompts?error=Prompt berhasil diperbarui, tapi collection gagal diperbarui."
+    );
   }
 
   redirect("/dashboard/prompts?message=Prompt berhasil diperbarui.");

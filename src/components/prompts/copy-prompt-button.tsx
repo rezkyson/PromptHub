@@ -9,12 +9,14 @@ type CopyPromptButtonProps = {
   content: string;
   iconOnly?: boolean;
   label?: string;
+  promptId?: string;
 };
 
 export function CopyPromptButton({
   content,
   iconOnly,
   label = "Copy prompt",
+  promptId,
 }: CopyPromptButtonProps) {
   async function handleCopy() {
     if (!navigator.clipboard) {
@@ -25,6 +27,12 @@ export function CopyPromptButton({
     try {
       await navigator.clipboard.writeText(content);
       toast.success("Copied!");
+
+      if (promptId) {
+        void fetch(`/api/prompts/${promptId}/copy`, {
+          method: "POST",
+        });
+      }
     } catch {
       toast.error("Prompt gagal disalin.");
     }

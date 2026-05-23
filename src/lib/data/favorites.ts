@@ -1,13 +1,14 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { mapPromptRow } from "@/lib/supabase/mappers";
 import type { ProfileRow, PromptFavoriteRow, PromptRow } from "@/types/database";
-import type { Prompt, PromptCategory } from "@/types/prompt";
+import type { Prompt, PromptCategory, PromptSort } from "@/types/prompt";
 
 type FavoritePromptFilters = {
   category?: PromptCategory | "";
   limit?: number;
   offset?: number;
   search?: string;
+  sort?: PromptSort;
 };
 
 type FavoriteRowWithPrompt = Pick<
@@ -48,6 +49,26 @@ function matchesFavoriteFilters(prompt: Prompt, filters: FavoritePromptFilters) 
     : true;
 
   return matchesSearch && matchesCategory;
+}
+
+function sortFavoritePrompts(prompts: Prompt[], sort: PromptSort = "newest") {
+  return [...prompts].sort((firstPrompt, secondPrompt) => {
+    if (sort === "most_copied") {
+      return (
+        secondPrompt.copyCount - firstPrompt.copyCount ||
+        secondPrompt.createdAt.localeCompare(firstPrompt.createdAt)
+      );
+    }
+
+    if (sort === "title_az") {
+      return (
+        firstPrompt.title.localeCompare(secondPrompt.title) ||
+        secondPrompt.createdAt.localeCompare(firstPrompt.createdAt)
+      );
+    }
+
+    return secondPrompt.createdAt.localeCompare(firstPrompt.createdAt);
+  });
 }
 
 export async function attachFavoriteState(
@@ -97,10 +118,13 @@ export async function getFavoritePrompts(
     throw new Error(error.message);
   }
 
-  const prompts = ((data ?? []) as FavoriteRowWithPrompt[])
+  const prompts = sortFavoritePrompts(
+    ((data ?? []) as FavoriteRowWithPrompt[])
     .map((row) => (row.prompts ? mapPromptRow(row.prompts) : null))
     .filter((prompt): prompt is Prompt => Boolean(prompt))
-    .filter((prompt) => matchesFavoriteFilters(prompt, filters))
+      .filter((prompt) => matchesFavoriteFilters(prompt, filters)),
+    filters.sort
+  )
     .map((prompt) => ({
       ...prompt,
       isFavorited: true,

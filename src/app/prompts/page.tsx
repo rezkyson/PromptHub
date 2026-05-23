@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { PROMPT_CATEGORIES } from "@/lib/constants/prompts";
 import { getCurrentUser } from "@/lib/data/auth";
 import { getPublicPrompts } from "@/lib/data/prompts";
-import type { PromptCategory } from "@/types/prompt";
+import type { PromptCategory, PromptSort } from "@/types/prompt";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,7 @@ type PromptsPageProps = {
   searchParams: Promise<{
     category?: string;
     search?: string;
+    sort?: string;
   }>;
 };
 
@@ -22,15 +23,25 @@ function toCategoryFilter(value: string | undefined) {
   return "";
 }
 
+function toPromptSort(value: string | undefined): PromptSort {
+  if (value === "most_copied" || value === "title_az") {
+    return value;
+  }
+
+  return "newest";
+}
+
 export default async function PromptsPage({ searchParams }: PromptsPageProps) {
-  const { category, search } = await searchParams;
+  const { category, search, sort } = await searchParams;
   const categoryFilter = toCategoryFilter(category);
+  const sortFilter = toPromptSort(sort);
   const [user, prompts] = await Promise.all([
     getCurrentUser(),
     getPublicPrompts({
       category: categoryFilter,
       limit: 12,
       search,
+      sort: sortFilter,
     }),
   ]);
 
@@ -52,6 +63,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
           initialCategory={categoryFilter}
           initialPrompts={prompts}
           initialSearch={search}
+          initialSort={sortFilter}
           isAuthenticated={Boolean(user)}
           mode="public"
         />

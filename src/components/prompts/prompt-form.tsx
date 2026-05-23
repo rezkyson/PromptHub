@@ -3,6 +3,7 @@
 import {
   EyeIcon,
   FileTextIcon,
+  FolderIcon,
   ListIcon,
   TagsIcon,
   TypeIcon,
@@ -20,6 +21,7 @@ import {
   createPromptAction,
   updatePromptAction,
 } from "@/lib/prompts/actions";
+import type { Collection } from "@/types/collection";
 import type { Prompt } from "@/types/prompt";
 
 function FieldError({ message }: { message?: string }) {
@@ -31,10 +33,16 @@ function FieldError({ message }: { message?: string }) {
 }
 
 type PromptFormProps = {
+  collections?: Collection[];
   prompt?: Prompt;
+  selectedCollectionIds?: string[];
 };
 
-export function PromptForm({ prompt }: PromptFormProps) {
+export function PromptForm({
+  collections = [],
+  prompt,
+  selectedCollectionIds = [],
+}: PromptFormProps) {
   const isEditMode = Boolean(prompt);
   const [state, formAction] = useActionState(
     isEditMode ? updatePromptAction : createPromptAction,
@@ -47,7 +55,9 @@ export function PromptForm({ prompt }: PromptFormProps) {
     tags: state.values?.tags ?? prompt?.tags.join(", ") ?? "",
     content: state.values?.content ?? prompt?.content,
     visibility: state.values?.visibility ?? prompt?.visibility ?? "private",
+    collectionIds: state.values?.collectionIds ?? selectedCollectionIds,
   };
+  const selectedCollections = new Set(defaultValues.collectionIds);
 
   return (
     <form
@@ -172,6 +182,49 @@ export function PromptForm({ prompt }: PromptFormProps) {
             required
           />
           <FieldError message={state.errors?.content} />
+        </div>
+
+        <div className="space-y-3 md:col-span-2">
+          <div>
+            <Label>
+              <FolderIcon aria-hidden="true" />
+              Collections
+            </Label>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Opsional. Pilih collection agar prompt lebih mudah ditemukan lagi.
+            </p>
+          </div>
+
+          {collections.length > 0 ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {collections.map((collection) => (
+                <label
+                  className="flex cursor-pointer items-start gap-3 rounded-2xl border bg-background p-4 text-sm transition-colors hover:bg-muted/60"
+                  key={collection.id}
+                >
+                  <input
+                    className="mt-1 size-4 accent-primary"
+                    defaultChecked={selectedCollections.has(collection.id)}
+                    name="collectionIds"
+                    type="checkbox"
+                    value={collection.id}
+                  />
+                  <span className="min-w-0">
+                    <span className="block font-medium">{collection.name}</span>
+                    {collection.description ? (
+                      <span className="mt-1 line-clamp-2 block leading-6 text-muted-foreground">
+                        {collection.description}
+                      </span>
+                    ) : null}
+                  </span>
+                </label>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-muted p-4 text-sm leading-6 text-muted-foreground">
+              Belum ada collection. Kamu bisa membuatnya dari menu Collections.
+            </div>
+          )}
         </div>
       </div>
 

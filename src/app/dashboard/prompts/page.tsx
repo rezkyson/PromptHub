@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PROMPT_CATEGORIES } from "@/lib/constants/prompts";
 import { getCurrentUser } from "@/lib/data/auth";
 import { getUserPromptStats, getUserPrompts } from "@/lib/data/prompts";
-import type { PromptCategory } from "@/types/prompt";
+import type { PromptCategory, PromptSort } from "@/types/prompt";
 
 type MyPromptsPageProps = {
   searchParams: Promise<{
@@ -15,6 +15,7 @@ type MyPromptsPageProps = {
     error?: string;
     message?: string;
     search?: string;
+    sort?: string;
   }>;
 };
 
@@ -26,12 +27,21 @@ function toCategoryFilter(value: string | undefined) {
   return "";
 }
 
+function toPromptSort(value: string | undefined): PromptSort {
+  if (value === "most_copied" || value === "title_az") {
+    return value;
+  }
+
+  return "newest";
+}
+
 export default async function MyPromptsPage({
   searchParams,
 }: MyPromptsPageProps) {
-  const { category, error, message, search } = await searchParams;
+  const { category, error, message, search, sort } = await searchParams;
   const user = await getCurrentUser();
   const categoryFilter = toCategoryFilter(category);
+  const sortFilter = toPromptSort(sort);
   const [stats, prompts] = user
     ? await Promise.all([
         getUserPromptStats(user.id),
@@ -39,6 +49,7 @@ export default async function MyPromptsPage({
           category: categoryFilter,
           limit: 12,
           search,
+          sort: sortFilter,
         }),
       ])
     : [
@@ -70,8 +81,13 @@ export default async function MyPromptsPage({
         initialCategory={categoryFilter}
         initialPrompts={prompts}
         initialSearch={search}
+        initialSort={sortFilter}
         mode="user"
-        stats={stats}
+        stats={{
+          private: stats.private,
+          public: stats.public,
+          total: stats.total,
+        }}
         userId={user?.id}
       />
     </section>

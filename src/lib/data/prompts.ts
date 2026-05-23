@@ -4,13 +4,14 @@ import { attachFavoriteState } from "@/lib/data/favorites";
 import { normalizeTags } from "@/lib/tags";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { mapPromptRow } from "@/lib/supabase/mappers";
-import type { PromptCategory, PromptFormValues } from "@/types/prompt";
+import type { PromptCategory, PromptFormValues, PromptSort } from "@/types/prompt";
 
 type PromptListFilters = {
   search?: string;
   category?: PromptCategory | "";
   limit?: number;
   offset?: number;
+  sort?: PromptSort;
 };
 
 const DEFAULT_PAGE_SIZE = 12;
@@ -25,18 +26,62 @@ function normalizePagination({ limit, offset }: PromptListFilters) {
   };
 }
 
+function getSearchFilter(search?: string) {
+  const sanitizedSearch = search
+    ?.trim()
+    .replace(/[,%()]/g, " ")
+    .replace(/\s+/g, " ");
+
+  if (!sanitizedSearch) {
+    return null;
+  }
+
+  return [
+    `title.ilike.%${sanitizedSearch}%`,
+    `description.ilike.%${sanitizedSearch}%`,
+    `content.ilike.%${sanitizedSearch}%`,
+  ].join(",");
+}
+
+function orderPromptQuery<
+  TQuery extends {
+    order: (column: string, options: { ascending: boolean }) => TQuery;
+  },
+>(
+  query: TQuery,
+  sort: PromptSort = "newest"
+) {
+  if (sort === "most_copied") {
+    return query
+      .order("copy_count", { ascending: false })
+      .order("created_at", { ascending: false });
+  }
+
+  if (sort === "title_az") {
+    return query
+      .order("title", { ascending: true })
+      .order("created_at", { ascending: false });
+  }
+
+  return query.order("created_at", { ascending: false });
+}
+
 export async function getPublicPrompts(filters: PromptListFilters = {}) {
   const supabase = await createSupabaseServerClient();
   const { from, to } = normalizePagination(filters);
-  let query = supabase
+  let query = orderPromptQuery(
+    supabase
     .from("prompts")
     .select("*, profiles!prompts_user_id_fkey(*)")
-    .eq("visibility", "public")
-    .order("created_at", { ascending: false })
+      .eq("visibility", "public"),
+    filters.sort
+  )
     .range(from, to);
 
-  if (filters.search?.trim()) {
-    query = query.ilike("title", `%${filters.search.trim()}%`);
+  const searchFilter = getSearchFilter(filters.search);
+
+  if (searchFilter) {
+    query = query.or(searchFilter);
   }
 
   if (filters.category) {
@@ -60,16 +105,20 @@ export async function getPublicPromptsByUserId(
 ) {
   const supabase = await createSupabaseServerClient();
   const { from, to } = normalizePagination(filters);
-  let query = supabase
+  let query = orderPromptQuery(
+    supabase
     .from("prompts")
     .select("*, profiles!prompts_user_id_fkey(*)")
     .eq("user_id", userId)
-    .eq("visibility", "public")
-    .order("created_at", { ascending: false })
+      .eq("visibility", "public"),
+    filters.sort
+  )
     .range(from, to);
 
-  if (filters.search?.trim()) {
-    query = query.ilike("title", `%${filters.search.trim()}%`);
+  const searchFilter = getSearchFilter(filters.search);
+
+  if (searchFilter) {
+    query = query.or(searchFilter);
   }
 
   if (filters.category) {
@@ -111,15 +160,19 @@ export async function getUserPrompts(
 ) {
   const supabase = await createSupabaseServerClient();
   const { from, to } = normalizePagination(filters);
-  let query = supabase
+  let query = orderPromptQuery(
+    supabase
     .from("prompts")
     .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
+      .eq("user_id", userId),
+    filters.sort
+  )
     .range(from, to);
 
-  if (filters.search?.trim()) {
-    query = query.ilike("title", `%${filters.search.trim()}%`);
+  const searchFilter = getSearchFilter(filters.search);
+
+  if (searchFilter) {
+    query = query.or(searchFilter);
   }
 
   if (filters.category) {
@@ -158,15 +211,32 @@ async function countUserPromptsByVisibility(
   return count ?? 0;
 }
 
+async function countUserPromptCopies(userId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("prompts")
+    .select("copy_count")
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []).reduce((total, prompt) => total + prompt.copy_count, 0);
+}
+
 export async function getUserPromptStats(userId: string) {
-  const [total, publicCount, privateCount, recentPrompts] = await Promise.all([
+  const [total, publicCount, privateCount, copyCount, recentPrompts] =
+    await Promise.all([
     countUserPromptsByVisibility(userId),
     countUserPromptsByVisibility(userId, "public"),
     countUserPromptsByVisibility(userId, "private"),
+    countUserPromptCopies(userId),
     getUserPrompts(userId, { limit: 3 }),
   ]);
 
   return {
+    copyCount,
     total,
     public: publicCount,
     private: privateCount,

@@ -2,11 +2,13 @@ import Link from "next/link";
 import {
   ArrowUpRightIcon,
   CalendarDaysIcon,
+  CopyIcon,
   Globe2Icon,
   LockKeyholeIcon,
   PencilIcon,
 } from "lucide-react";
 
+import { HighlightedText } from "@/components/highlighted-text";
 import { DeletePromptDialog } from "@/components/prompts/delete-prompt-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,10 +16,11 @@ import { formatDate } from "@/lib/formatters";
 import type { Prompt } from "@/types/prompt";
 
 type MyPromptCardProps = {
+  highlightQuery?: string;
   prompt: Prompt;
 };
 
-export function MyPromptCard({ prompt }: MyPromptCardProps) {
+export function MyPromptCard({ highlightQuery, prompt }: MyPromptCardProps) {
   return (
     <article
       className="grid gap-5 rounded-2xl border bg-card p-5 text-card-foreground lg:grid-cols-[1fr_auto] lg:items-center"
@@ -38,18 +41,29 @@ export function MyPromptCard({ prompt }: MyPromptCardProps) {
             <CalendarDaysIcon aria-hidden="true" className="size-4" />
             {formatDate(prompt.createdAt)}
           </span>
+          <span className="inline-flex items-center gap-1 text-sm">
+            <CopyIcon aria-hidden="true" className="size-4" />
+            {prompt.copyCount} salinan
+          </span>
         </div>
         <div>
-          <h2 className="text-2xl font-medium tracking-tight">{prompt.title}</h2>
+          <h2 className="text-2xl font-medium tracking-tight">
+            <HighlightedText query={highlightQuery} text={prompt.title} />
+          </h2>
           {prompt.description ? (
-            <p className="mt-2 line-clamp-2 leading-7">{prompt.description}</p>
+            <p className="mt-2 line-clamp-2 leading-7">
+              <HighlightedText
+                query={highlightQuery}
+                text={prompt.description}
+              />
+            </p>
           ) : null}
         </div>
         {prompt.tags.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {prompt.tags.map((tag) => (
               <Badge key={tag} variant="outline">
-                {tag}
+                <HighlightedText query={highlightQuery} text={tag} />
               </Badge>
             ))}
           </div>

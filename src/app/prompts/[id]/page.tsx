@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   CalendarDaysIcon,
+  CopyIcon,
   FileTextIcon,
   PencilIcon,
   RefreshCwIcon,
@@ -92,7 +93,10 @@ export default async function PromptDetailPage({ params }: PromptDetailPageProps
                     promptId={prompt.id}
                   />
                 ) : null}
-                <CopyPromptButton content={prompt.content} />
+                <CopyPromptButton
+                  content={prompt.content}
+                  promptId={prompt.id}
+                />
               </div>
             </div>
 
@@ -119,6 +123,13 @@ export default async function PromptDetailPage({ params }: PromptDetailPageProps
                   <dd className="mt-1 inline-flex items-center gap-1">
                     <RefreshCwIcon aria-hidden="true" className="size-4" />
                     {formatDateTime(prompt.updatedAt)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium">Disalin</dt>
+                  <dd className="mt-1 inline-flex items-center gap-1">
+                    <CopyIcon aria-hidden="true" className="size-4" />
+                    {prompt.copyCount} akun
                   </dd>
                 </div>
               </dl>

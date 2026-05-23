@@ -2,6 +2,10 @@ import { notFound } from "next/navigation";
 
 import { PromptForm } from "@/components/prompts/prompt-form";
 import { getCurrentUser } from "@/lib/data/auth";
+import {
+  getPromptCollectionIds,
+  getUserCollections,
+} from "@/lib/data/collections";
 import { getPromptById } from "@/lib/data/prompts";
 
 type EditPromptPageProps = {
@@ -18,6 +22,11 @@ export default async function EditPromptPage({ params }: EditPromptPageProps) {
     notFound();
   }
 
+  const [collections, selectedCollectionIds] = await Promise.all([
+    getUserCollections(user.id),
+    getPromptCollectionIds(user.id, prompt.id),
+  ]);
+
   return (
     <section className="mx-auto w-full max-w-4xl px-6 py-12 sm:px-10 lg:px-12">
       <div className="mb-8 rounded-3xl bg-block-cream p-8 sm:p-12">
@@ -32,7 +41,11 @@ export default async function EditPromptPage({ params }: EditPromptPageProps) {
         </p>
       </div>
 
-      <PromptForm prompt={prompt} />
+      <PromptForm
+        collections={collections}
+        prompt={prompt}
+        selectedCollectionIds={selectedCollectionIds}
+      />
     </section>
   );
 }

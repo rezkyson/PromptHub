@@ -12,12 +12,12 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b bg-background/95" data-motion="site-header">
-      <nav className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-5 sm:px-10 lg:px-12">
-        <div className="flex items-center justify-between gap-4">
+      <nav className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-5 sm:px-10 lg:flex-row lg:items-center lg:justify-between lg:px-12">
+        <div className="flex items-center justify-between gap-4 lg:contents">
           <Link className="text-xl font-medium tracking-tight" href="/">
             PromptHub
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:hidden">
             <ThemeToggle />
             {user ? (
               <form action={logoutAction}>
@@ -37,7 +37,27 @@ export async function SiteHeader() {
           </div>
         </div>
 
-        <SiteNavLinks isAuthenticated={Boolean(user)} />
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <SiteNavLinks isAuthenticated={Boolean(user)} />
+          <div className="hidden items-center gap-2 lg:flex">
+            <ThemeToggle />
+            {user ? (
+              <form action={logoutAction}>
+                <Button className="rounded-full" type="submit">
+                  <LogOutIcon aria-hidden="true" />
+                  Logout
+                </Button>
+              </form>
+            ) : (
+              <Button asChild className="rounded-full">
+                <Link href="/register">
+                  <UserPlusIcon aria-hidden="true" />
+                  Register
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
       </nav>
     </header>
   );

@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { SubmitButton } from "@/components/auth/submit-button";
-import { SiteHeader } from "@/components/site-header";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ToastMessage } from "@/components/toast-message";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,9 +53,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   const username = profile?.username || getFallbackUsername(user.email);
 
   return (
-    <main className="min-h-dvh bg-background text-foreground">
-      <SiteHeader />
-
+    <DashboardShell>
       <section className="mx-auto w-full max-w-4xl px-6 py-12 sm:px-10 lg:px-12">
         <ToastMessage error={error} message={message} />
 
@@ -173,6 +171,6 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           </div>
         </form>
       </section>
-    </main>
+    </DashboardShell>
   );
 }

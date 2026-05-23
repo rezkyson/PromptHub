@@ -16,6 +16,7 @@ export type PromptActionState = {
     tags?: string;
     content?: string;
     visibility?: string;
+    collectionIds?: string[];
   };
 };
 

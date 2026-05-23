@@ -2,11 +2,13 @@ import Link from "next/link";
 import {
   ArrowUpRightIcon,
   CalendarDaysIcon,
+  CopyIcon,
   Globe2Icon,
   LockKeyholeIcon,
   UserRoundIcon,
 } from "lucide-react";
 
+import { HighlightedText } from "@/components/highlighted-text";
 import { CopyPromptButton } from "@/components/prompts/copy-prompt-button";
 import { FavoritePromptButton } from "@/components/prompts/favorite-prompt-button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,7 @@ type PromptCardProps = {
   prompt: Prompt;
   authorName?: string;
   href?: string;
+  highlightQuery?: string;
   isAuthenticated?: boolean;
 };
 
@@ -37,6 +40,7 @@ export function PromptCard({
   prompt,
   authorName = "Pengguna PromptHub",
   href = `/prompts/${prompt.id}`,
+  highlightQuery,
   isAuthenticated = false,
 }: PromptCardProps) {
   const displayAuthorName = getPromptAuthorName(prompt, authorName);
@@ -59,17 +63,22 @@ export function PromptCard({
       </div>
       <div className="min-w-0 flex-1 space-y-3">
         <h3 className="line-clamp-2 text-2xl font-medium tracking-tight">
-          {prompt.title}
+          <HighlightedText query={highlightQuery} text={prompt.title} />
         </h3>
         {prompt.description ? (
-          <p className="line-clamp-3 leading-7">{prompt.description}</p>
+          <p className="line-clamp-3 leading-7">
+            <HighlightedText
+              query={highlightQuery}
+              text={prompt.description}
+            />
+          </p>
         ) : null}
       </div>
       {prompt.tags.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {prompt.tags.map((tag) => (
             <Badge key={tag} variant="outline">
-              {tag}
+              <HighlightedText query={highlightQuery} text={tag} />
             </Badge>
           ))}
         </div>
@@ -85,6 +94,11 @@ export function PromptCard({
             <CalendarDaysIcon aria-hidden="true" className="size-4" />
             {formatDate(prompt.createdAt)}
           </span>
+          <span aria-hidden="true">-</span>
+          <span className="inline-flex items-center gap-1">
+            <CopyIcon aria-hidden="true" className="size-4" />
+            {prompt.copyCount} salinan
+          </span>
         </p>
         <div className="flex shrink-0 items-center gap-2">
           {prompt.visibility === "public" ? (
@@ -95,7 +109,12 @@ export function PromptCard({
               promptId={prompt.id}
             />
           ) : null}
-          <CopyPromptButton content={prompt.content} iconOnly label="Copy" />
+          <CopyPromptButton
+            content={prompt.content}
+            iconOnly
+            label="Copy"
+            promptId={prompt.id}
+          />
           <Button
             asChild
             aria-label="Lihat detail prompt"

@@ -4,6 +4,7 @@ import {
   ArrowUpRightIcon,
   CalendarDaysIcon,
   CompassIcon,
+  CopyIcon,
   LayoutDashboardIcon,
   UserRoundIcon,
 } from "lucide-react";
@@ -80,6 +81,11 @@ function HomePromptPreviewCard({
         <p className="truncate text-sm text-muted-foreground">
           <UserRoundIcon aria-hidden="true" className="mr-1 inline size-4" />
           {getPromptAuthorName(prompt)}
+          <span aria-hidden="true" className="mx-2">
+            -
+          </span>
+          <CopyIcon aria-hidden="true" className="mr-1 inline size-4" />
+          {prompt.copyCount} salinan
         </p>
         <div className="flex shrink-0 flex-wrap gap-2">
           <FavoritePromptButton
@@ -88,7 +94,12 @@ function HomePromptPreviewCard({
             isFavorited={prompt.isFavorited}
             promptId={prompt.id}
           />
-          <CopyPromptButton content={prompt.content} iconOnly label="Copy" />
+          <CopyPromptButton
+            content={prompt.content}
+            iconOnly
+            label="Copy"
+            promptId={prompt.id}
+          />
           <Button
             asChild
             aria-label="Lihat detail prompt"

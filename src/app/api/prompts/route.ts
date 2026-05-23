@@ -6,7 +6,7 @@ import { attachFavoriteState, getFavoritePrompts } from "@/lib/data/favorites";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { mapPromptRow } from "@/lib/supabase/mappers";
-import type { PromptCategory } from "@/types/prompt";
+import type { PromptCategory, PromptSort } from "@/types/prompt";
 
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 50;
@@ -21,6 +21,51 @@ function toCategoryFilter(value: string | null) {
   }
 
   return "";
+}
+
+function toPromptSort(value: string | null): PromptSort {
+  if (value === "most_copied" || value === "title_az") {
+    return value;
+  }
+
+  return "newest";
+}
+
+function getSearchFilter(search?: string) {
+  const sanitizedSearch = search
+    ?.trim()
+    .replace(/[,%()]/g, " ")
+    .replace(/\s+/g, " ");
+
+  if (!sanitizedSearch) {
+    return null;
+  }
+
+  return [
+    `title.ilike.%${sanitizedSearch}%`,
+    `description.ilike.%${sanitizedSearch}%`,
+    `content.ilike.%${sanitizedSearch}%`,
+  ].join(",");
+}
+
+function orderPromptQuery<
+  TQuery extends {
+    order: (column: string, options: { ascending: boolean }) => TQuery;
+  },
+>(query: TQuery, sort: PromptSort) {
+  if (sort === "most_copied") {
+    return query
+      .order("copy_count", { ascending: false })
+      .order("created_at", { ascending: false });
+  }
+
+  if (sort === "title_az") {
+    return query
+      .order("title", { ascending: true })
+      .order("created_at", { ascending: false });
+  }
+
+  return query.order("created_at", { ascending: false });
 }
 
 function toPositiveInteger(value: string | null, fallback: number) {
@@ -59,6 +104,7 @@ export async function GET(request: NextRequest) {
 
   const search = searchParams.get("search")?.trim();
   const category = toCategoryFilter(searchParams.get("category"));
+  const sort = toPromptSort(searchParams.get("sort"));
   const limit = Math.min(
     Math.max(toPositiveInteger(searchParams.get("limit"), DEFAULT_PAGE_SIZE), 1),
     MAX_PAGE_SIZE
@@ -77,6 +123,7 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
       search,
+      sort,
     });
 
     return NextResponse.json(result);
@@ -84,10 +131,12 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createSupabaseServerClient();
 
-  let query = supabase
+  let query = orderPromptQuery(
+    supabase
     .from("prompts")
-    .select("*, profiles!prompts_user_id_fkey(*)")
-    .order("created_at", { ascending: false })
+      .select("*, profiles!prompts_user_id_fkey(*)"),
+    sort
+  )
     .range(offset, offset + limit - 1);
 
   if (mode === "public") {
@@ -104,8 +153,10 @@ export async function GET(request: NextRequest) {
     query = query.eq("user_id", user.id);
   }
 
-  if (search) {
-    query = query.ilike("title", `%${search}%`);
+  const searchFilter = getSearchFilter(search);
+
+  if (searchFilter) {
+    query = query.or(searchFilter);
   }
 
   if (category) {

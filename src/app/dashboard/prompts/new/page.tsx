@@ -1,6 +1,11 @@
 import { PromptForm } from "@/components/prompts/prompt-form";
+import { getCurrentUser } from "@/lib/data/auth";
+import { getUserCollections } from "@/lib/data/collections";
 
-export default function NewPromptPage() {
+export default async function NewPromptPage() {
+  const user = await getCurrentUser();
+  const collections = user ? await getUserCollections(user.id) : [];
+
   return (
     <section className="mx-auto w-full max-w-4xl px-6 py-12 sm:px-10 lg:px-12">
       <div className="mb-8 rounded-3xl bg-block-cream p-8 sm:p-12">
@@ -16,7 +21,7 @@ export default function NewPromptPage() {
         </p>
       </div>
 
-      <PromptForm />
+      <PromptForm collections={collections} />
     </section>
   );
 }

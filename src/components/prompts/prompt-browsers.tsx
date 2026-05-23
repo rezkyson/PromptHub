@@ -15,7 +15,7 @@ import { PromptCard } from "@/components/prompt-card";
 import { MyPromptCard } from "@/components/prompts/my-prompt-card";
 import { PromptFilterControls } from "@/components/prompts/prompt-filter-controls";
 import { Button } from "@/components/ui/button";
-import type { Prompt, PromptCategory } from "@/types/prompt";
+import type { Prompt, PromptCategory, PromptSort } from "@/types/prompt";
 
 type PromptBrowserMode = "favorites" | "public" | "user";
 
@@ -25,6 +25,7 @@ type PromptBrowserProps = {
   initialCategory: PromptCategory | "";
   initialPrompts: Prompt[];
   initialSearch?: string;
+  initialSort?: PromptSort;
   isAuthenticated?: boolean;
   mode: PromptBrowserMode;
   stats?: {
@@ -46,16 +47,19 @@ function getPromptRequestParams({
   mode,
   offset = 0,
   search,
+  sort,
 }: {
   category: PromptCategory | "";
   mode: PromptBrowserMode;
   offset?: number;
   search: string;
+  sort: PromptSort;
 }) {
   const params = new URLSearchParams({
     limit: String(PAGE_SIZE),
     mode,
     offset: String(offset),
+    sort,
   });
 
   if (search.trim()) {
@@ -69,7 +73,11 @@ function getPromptRequestParams({
   return params;
 }
 
-function getFilterUrl(search: string, category: PromptCategory | "") {
+function getFilterUrl(
+  search: string,
+  category: PromptCategory | "",
+  sort: PromptSort
+) {
   const params = new URLSearchParams(window.location.search);
   const trimmedSearch = search.trim();
 
@@ -88,6 +96,12 @@ function getFilterUrl(search: string, category: PromptCategory | "") {
     params.delete("category");
   }
 
+  if (sort === "newest") {
+    params.delete("sort");
+  } else {
+    params.set("sort", sort);
+  }
+
   const query = params.toString();
 
   return query ? `${window.location.pathname}?${query}` : window.location.pathname;
@@ -97,16 +111,39 @@ function filterCachedPrompts(
   prompts: Prompt[],
   search: string,
   category: PromptCategory | "",
+  sort: PromptSort
 ) {
   const normalizedSearch = search.trim().toLowerCase();
 
-  return prompts.filter((prompt) => {
+  const filteredPrompts = prompts.filter((prompt) => {
     const matchesSearch = normalizedSearch
-      ? prompt.title.toLowerCase().includes(normalizedSearch)
+      ? [
+          prompt.title,
+          prompt.description ?? "",
+          prompt.tags.join(" "),
+        ].some((value) => value.toLowerCase().includes(normalizedSearch))
       : true;
     const matchesCategory = category ? prompt.category === category : true;
 
     return matchesSearch && matchesCategory;
+  });
+
+  return filteredPrompts.sort((firstPrompt, secondPrompt) => {
+    if (sort === "most_copied") {
+      return (
+        secondPrompt.copyCount - firstPrompt.copyCount ||
+        secondPrompt.createdAt.localeCompare(firstPrompt.createdAt)
+      );
+    }
+
+    if (sort === "title_az") {
+      return (
+        firstPrompt.title.localeCompare(secondPrompt.title) ||
+        secondPrompt.createdAt.localeCompare(firstPrompt.createdAt)
+      );
+    }
+
+    return secondPrompt.createdAt.localeCompare(firstPrompt.createdAt);
   });
 }
 
@@ -114,11 +151,13 @@ function usePromptBrowser({
   initialCategory,
   initialPrompts,
   initialSearch,
+  initialSort,
   mode,
 }: PromptBrowserProps) {
   const requestId = useRef(0);
   const [search, setSearch] = useState(initialSearch ?? "");
   const [category, setCategory] = useState(initialCategory);
+  const [sort, setSort] = useState<PromptSort>(initialSort ?? "newest");
   const [cachedPrompts, setCachedPrompts] = useState(initialPrompts);
   const [prompts, setPrompts] = useState(initialPrompts);
   const [error, setError] = useState<string | null>(null);
@@ -128,26 +167,32 @@ function usePromptBrowser({
 
   function updateSearch(nextSearch: string) {
     setSearch(nextSearch);
-    setPrompts(filterCachedPrompts(cachedPrompts, nextSearch, category));
+    setPrompts(filterCachedPrompts(cachedPrompts, nextSearch, category, sort));
     setHasMore(false);
   }
 
   function updateCategory(nextCategory: PromptCategory | "") {
     setCategory(nextCategory);
-    setPrompts(filterCachedPrompts(cachedPrompts, search, nextCategory));
+    setPrompts(filterCachedPrompts(cachedPrompts, search, nextCategory, sort));
+    setHasMore(false);
+  }
+
+  function updateSort(nextSort: PromptSort) {
+    setSort(nextSort);
+    setPrompts(filterCachedPrompts(cachedPrompts, search, category, nextSort));
     setHasMore(false);
   }
 
   useEffect(() => {
-    const nextUrl = getFilterUrl(search, category);
+    const nextUrl = getFilterUrl(search, category, sort);
 
     window.history.replaceState(null, "", nextUrl);
-  }, [category, search]);
+  }, [category, search, sort]);
 
   useEffect(() => {
     const timeout = window.setTimeout(async () => {
       const currentRequest = requestId.current + 1;
-      const params = getPromptRequestParams({ category, mode, search });
+      const params = getPromptRequestParams({ category, mode, search, sort });
 
       requestId.current = currentRequest;
       setIsFetching(true);
@@ -183,7 +228,7 @@ function usePromptBrowser({
     }, search.trim() ? 120 : 0);
 
     return () => window.clearTimeout(timeout);
-  }, [category, mode, search]);
+  }, [category, mode, search, sort]);
 
   async function loadMore() {
     if (isLoadingMore || !hasMore) {
@@ -192,7 +237,13 @@ function usePromptBrowser({
 
     const currentRequest = requestId.current + 1;
     const offset = prompts.length;
-    const params = getPromptRequestParams({ category, mode, offset, search });
+    const params = getPromptRequestParams({
+      category,
+      mode,
+      offset,
+      search,
+      sort,
+    });
 
     requestId.current = currentRequest;
     setIsLoadingMore(true);
@@ -239,6 +290,8 @@ function usePromptBrowser({
     search,
     setCategory: updateCategory,
     setSearch: updateSearch,
+    setSort: updateSort,
+    sort,
   };
 }
 
@@ -288,6 +341,8 @@ export function PublicPromptBrowser(props: PromptBrowserProps) {
     search,
     setCategory,
     setSearch,
+    setSort,
+    sort,
   } = usePromptBrowser(props);
 
   return (
@@ -296,8 +351,10 @@ export function PublicPromptBrowser(props: PromptBrowserProps) {
         category={category}
         onCategoryChange={setCategory}
         onSearchChange={setSearch}
+        onSortChange={setSort}
         search={search}
         searchPlaceholder="Cari prompt berdasarkan judul"
+        sort={sort}
       />
 
       {error ? <p className="mt-4 text-sm text-destructive">{error}</p> : null}
@@ -307,6 +364,7 @@ export function PublicPromptBrowser(props: PromptBrowserProps) {
           <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {prompts.map((prompt) => (
               <PromptCard
+                highlightQuery={search}
                 isAuthenticated={props.isAuthenticated}
                 key={prompt.id}
                 prompt={prompt}
@@ -368,6 +426,8 @@ export function MyPromptBrowser(props: PromptBrowserProps) {
     search,
     setCategory,
     setSearch,
+    setSort,
+    sort,
   } = usePromptBrowser(props);
 
   return (
@@ -376,8 +436,10 @@ export function MyPromptBrowser(props: PromptBrowserProps) {
         category={category}
         onCategoryChange={setCategory}
         onSearchChange={setSearch}
+        onSortChange={setSort}
         search={search}
         searchPlaceholder="Cari berdasarkan judul"
+        sort={sort}
       />
 
       {props.stats ? (
@@ -393,7 +455,11 @@ export function MyPromptBrowser(props: PromptBrowserProps) {
         <>
           <div className="mt-5 space-y-4">
             {prompts.map((prompt) => (
-              <MyPromptCard key={prompt.id} prompt={prompt} />
+              <MyPromptCard
+                highlightQuery={search}
+                key={prompt.id}
+                prompt={prompt}
+              />
             ))}
           </div>
           <LoadMoreButton
@@ -451,6 +517,8 @@ export function FavoritePromptBrowser(props: PromptBrowserProps) {
     search,
     setCategory,
     setSearch,
+    setSort,
+    sort,
   } = usePromptBrowser(props);
 
   return (
@@ -459,8 +527,10 @@ export function FavoritePromptBrowser(props: PromptBrowserProps) {
         category={category}
         onCategoryChange={setCategory}
         onSearchChange={setSearch}
+        onSortChange={setSort}
         search={search}
         searchPlaceholder="Cari favorite berdasarkan judul, deskripsi, atau tag"
+        sort={sort}
       />
 
       {error ? <p className="mt-4 text-sm text-destructive">{error}</p> : null}
@@ -470,6 +540,7 @@ export function FavoritePromptBrowser(props: PromptBrowserProps) {
           <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {prompts.map((prompt) => (
               <PromptCard
+                highlightQuery={search}
                 isAuthenticated={props.isAuthenticated}
                 key={prompt.id}
                 prompt={prompt}

@@ -5,7 +5,7 @@ import { ToastMessage } from "@/components/toast-message";
 import { PROMPT_CATEGORIES } from "@/lib/constants/prompts";
 import { getCurrentUser } from "@/lib/data/auth";
 import { getFavoritePrompts } from "@/lib/data/favorites";
-import type { PromptCategory } from "@/types/prompt";
+import type { PromptCategory, PromptSort } from "@/types/prompt";
 
 type FavoritesPageProps = {
   searchParams: Promise<{
@@ -13,6 +13,7 @@ type FavoritesPageProps = {
     error?: string;
     message?: string;
     search?: string;
+    sort?: string;
   }>;
 };
 
@@ -24,17 +25,27 @@ function toCategoryFilter(value: string | undefined) {
   return "";
 }
 
+function toPromptSort(value: string | undefined): PromptSort {
+  if (value === "most_copied" || value === "title_az") {
+    return value;
+  }
+
+  return "newest";
+}
+
 export default async function FavoritesPage({
   searchParams,
 }: FavoritesPageProps) {
-  const { category, error, message, search } = await searchParams;
+  const { category, error, message, search, sort } = await searchParams;
   const user = await getCurrentUser();
   const categoryFilter = toCategoryFilter(category);
+  const sortFilter = toPromptSort(sort);
   const favorites = user
     ? await getFavoritePrompts(user.id, {
         category: categoryFilter,
         limit: 12,
         search,
+        sort: sortFilter,
       })
     : { hasMore: false, nextOffset: 0, prompts: [], total: 0 };
 
@@ -59,6 +70,7 @@ export default async function FavoritesPage({
         initialCategory={categoryFilter}
         initialPrompts={favorites.prompts}
         initialSearch={search}
+        initialSort={sortFilter}
         isAuthenticated={Boolean(user)}
         mode="favorites"
       />

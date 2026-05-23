@@ -7,6 +7,8 @@ export type PromptCategory = (typeof PROMPT_CATEGORIES)[number];
 
 export type PromptVisibility = (typeof PROMPT_VISIBILITIES)[number];
 
+export type PromptSort = "most_copied" | "newest" | "title_az";
+
 export type Profile = {
   id: string;
   username: string | null;
@@ -26,6 +28,7 @@ export type Prompt = {
   category: PromptCategory;
   tags: string[];
   content: string;
+  copyCount: number;
   isFavorited?: boolean;
   visibility: PromptVisibility;
   createdAt: string;

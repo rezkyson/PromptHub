@@ -8,7 +8,8 @@ import type {
   PromptCategory,
   PromptVisibility,
 } from "@/types/prompt";
-import type { ProfileRow, PromptRow } from "@/types/database";
+import type { Collection } from "@/types/collection";
+import type { CollectionRow, ProfileRow, PromptRow } from "@/types/database";
 
 type PromptRowWithProfile = PromptRow & {
   profiles?: ProfileRow | ProfileRow[] | null;
@@ -42,6 +43,21 @@ export function mapProfileRow(row: ProfileRow): Profile {
   };
 }
 
+export function mapCollectionRow(
+  row: CollectionRow,
+  promptCount = 0
+): Collection {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    name: row.name,
+    description: row.description,
+    promptCount,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 function mapPromptAuthor(row: PromptRowWithProfile) {
   const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
 
@@ -58,6 +74,7 @@ export function mapPromptRow(row: PromptRowWithProfile): Prompt {
     category: toPromptCategory(row.category),
     tags: row.tags,
     content: row.content,
+    copyCount: row.copy_count,
     visibility: toPromptVisibility(row.visibility),
     createdAt: row.created_at,
     updatedAt: row.updated_at,

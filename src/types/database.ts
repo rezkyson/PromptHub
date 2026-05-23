@@ -39,6 +39,41 @@ export type Database = {
         };
         Relationships: [];
       };
+      collections: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "collections_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       prompts: {
         Row: {
           id: string;
@@ -48,6 +83,7 @@ export type Database = {
           category: string;
           tags: string[];
           content: string;
+          copy_count: number;
           visibility: string;
           created_at: string;
           updated_at: string;
@@ -60,6 +96,7 @@ export type Database = {
           category: string;
           tags?: string[];
           content: string;
+          copy_count?: number;
           visibility?: string;
           created_at?: string;
           updated_at?: string;
@@ -72,6 +109,7 @@ export type Database = {
           category?: string;
           tags?: string[];
           content?: string;
+          copy_count?: number;
           visibility?: string;
           created_at?: string;
           updated_at?: string;
@@ -119,6 +157,72 @@ export type Database = {
           },
         ];
       };
+      prompt_copies: {
+        Row: {
+          user_id: string;
+          prompt_id: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          prompt_id: string;
+          created_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          prompt_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "prompt_copies_prompt_id_fkey";
+            columns: ["prompt_id"];
+            isOneToOne: false;
+            referencedRelation: "prompts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "prompt_copies_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      collection_prompts: {
+        Row: {
+          collection_id: string;
+          prompt_id: string;
+          created_at: string;
+        };
+        Insert: {
+          collection_id: string;
+          prompt_id: string;
+          created_at?: string;
+        };
+        Update: {
+          collection_id?: string;
+          prompt_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "collection_prompts_collection_id_fkey";
+            columns: ["collection_id"];
+            isOneToOne: false;
+            referencedRelation: "collections";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "collection_prompts_prompt_id_fkey";
+            columns: ["prompt_id"];
+            isOneToOne: false;
+            referencedRelation: "prompts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -134,6 +238,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: unknown;
       };
+      record_prompt_copy: {
+        Args: { target_prompt_id: string };
+        Returns: boolean;
+      };
       set_updated_at: {
         Args: Record<PropertyKey, never>;
         Returns: unknown;
@@ -146,8 +254,17 @@ export type Database = {
 
 export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
+export type CollectionRow = Database["public"]["Tables"]["collections"]["Row"];
+export type CollectionInsert =
+  Database["public"]["Tables"]["collections"]["Insert"];
+export type CollectionUpdate =
+  Database["public"]["Tables"]["collections"]["Update"];
+export type CollectionPromptRow =
+  Database["public"]["Tables"]["collection_prompts"]["Row"];
 export type PromptFavoriteRow =
   Database["public"]["Tables"]["prompt_favorites"]["Row"];
+export type PromptCopyRow =
+  Database["public"]["Tables"]["prompt_copies"]["Row"];
 export type PromptRow = Database["public"]["Tables"]["prompts"]["Row"];
 export type PromptInsert = Database["public"]["Tables"]["prompts"]["Insert"];
 export type PromptUpdate = Database["public"]["Tables"]["prompts"]["Update"];

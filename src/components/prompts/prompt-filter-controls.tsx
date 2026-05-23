@@ -4,25 +4,29 @@ import { SearchIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { PROMPT_CATEGORIES } from "@/lib/constants/prompts";
-import type { PromptCategory } from "@/types/prompt";
+import type { PromptCategory, PromptSort } from "@/types/prompt";
 
 type PromptFilterControlsProps = {
   category: PromptCategory | "";
   onCategoryChange: (category: PromptCategory | "") => void;
   onSearchChange: (search: string) => void;
+  onSortChange: (sort: PromptSort) => void;
   search: string;
   searchPlaceholder: string;
+  sort: PromptSort;
 };
 
 export function PromptFilterControls({
   category,
   onCategoryChange,
   onSearchChange,
+  onSortChange,
   search,
   searchPlaceholder,
+  sort,
 }: PromptFilterControlsProps) {
   return (
-    <div className="mt-8 grid gap-3 rounded-3xl bg-block-cream p-4 sm:grid-cols-[1fr_240px]">
+    <div className="mt-8 grid gap-3 rounded-3xl bg-block-cream p-4 lg:grid-cols-[1fr_220px_190px]">
       <div className="relative">
         <SearchIcon
           aria-hidden="true"
@@ -50,6 +54,16 @@ export function PromptFilterControls({
             {promptCategory}
           </option>
         ))}
+      </select>
+      <select
+        aria-label="Urutkan prompt"
+        className="h-12 rounded-2xl border border-border/70 bg-background/95 px-4 text-base text-foreground shadow-sm outline-none transition-colors focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/20 dark:border-white/15 dark:bg-card"
+        value={sort}
+        onChange={(event) => onSortChange(event.target.value as PromptSort)}
+      >
+        <option value="newest">Terbaru</option>
+        <option value="most_copied">Paling disalin</option>
+        <option value="title_az">A-Z</option>
       </select>
     </div>
   );
