@@ -8,23 +8,81 @@ type SkeletonListProps = {
 export function HeaderSkeleton() {
   return (
     <header className="border-b bg-background/95">
-      <nav className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-5 sm:px-10 lg:px-12">
+      <nav className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-5 sm:px-10 lg:flex-row lg:items-center lg:justify-between lg:px-12">
         <div className="flex items-center justify-between gap-4">
           <Skeleton className="h-7 w-32" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:hidden">
             <Skeleton className="size-8 rounded-full" />
             <Skeleton className="h-8 w-20 rounded-full" />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Skeleton className="h-8 w-24 rounded-full" />
-          <Skeleton className="h-8 w-36 rounded-full" />
-          <Skeleton className="h-8 w-28 rounded-full" />
-          <Skeleton className="h-8 w-28 rounded-full" />
-          <Skeleton className="h-8 w-24 rounded-full" />
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <Skeleton className="h-8 w-24 rounded-full" />
+            <Skeleton className="h-8 w-36 rounded-full" />
+            <Skeleton className="h-8 w-28 rounded-full" />
+          </div>
+          <div className="hidden items-center gap-2 lg:flex">
+            <Skeleton className="size-8 rounded-full" />
+            <Skeleton className="h-8 w-20 rounded-full" />
+          </div>
         </div>
       </nav>
     </header>
+  );
+}
+
+export function DashboardShellSkeleton({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <main
+      className="min-h-dvh bg-background text-foreground lg:grid lg:grid-cols-[260px_minmax(0,1fr)]"
+      data-motion-loading
+    >
+      <aside className="hidden border-r bg-background/95 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col">
+        <div className="border-b px-6 py-6">
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="mt-3 h-4 w-40" />
+        </div>
+        <div className="flex-1 space-y-2 px-4 py-5">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton className="h-11 rounded-2xl" key={index} />
+          ))}
+        </div>
+        <div className="space-y-4 border-t p-4">
+          <Skeleton className="h-8 rounded-full" />
+          <div className="flex items-center justify-between gap-2">
+            <Skeleton className="size-8 rounded-full" />
+            <Skeleton className="h-8 w-24 rounded-full" />
+          </div>
+        </div>
+      </aside>
+
+      <div className="min-w-0">
+        <header className="border-b bg-background/95 lg:hidden">
+          <div className="flex items-center justify-between gap-4 px-6 py-4">
+            <div className="min-w-0">
+              <Skeleton className="h-7 w-32" />
+              <Skeleton className="mt-2 h-3 w-40" />
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Skeleton className="size-9 rounded-full" />
+              <Skeleton className="size-8 rounded-full" />
+            </div>
+          </div>
+          <div className="flex gap-2 overflow-hidden px-6 pb-4">
+            <Skeleton className="h-9 w-28 shrink-0 rounded-full" />
+            <Skeleton className="h-9 w-32 shrink-0 rounded-full" />
+            <Skeleton className="h-9 w-32 shrink-0 rounded-full" />
+          </div>
+        </header>
+
+        {children}
+      </div>
+    </main>
   );
 }
 
@@ -204,6 +262,14 @@ export function PromptFormSkeleton() {
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-56 w-full rounded-lg" />
           </div>
+          <div className="space-y-3 md:col-span-2">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-full max-w-md" />
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Skeleton className="h-24 rounded-2xl" />
+              <Skeleton className="h-24 rounded-2xl" />
+            </div>
+          </div>
         </div>
         <Skeleton className="h-10 w-36 rounded-full" />
       </div>
@@ -211,9 +277,38 @@ export function PromptFormSkeleton() {
   );
 }
 
+export function CollectionFormSkeleton() {
+  return (
+    <>
+      <div className="mb-8 rounded-3xl bg-block-cream p-8 sm:p-12">
+        <Skeleton className="h-4 w-36 bg-background/50" />
+        <div className="mt-8 space-y-4">
+          <Skeleton className="h-12 w-full max-w-xl bg-background/55 sm:h-16" />
+          <Skeleton className="mt-6 h-5 w-full max-w-2xl bg-background/45" />
+          <Skeleton className="h-5 w-3/4 max-w-xl bg-background/45" />
+        </div>
+      </div>
+
+      <div className="space-y-6 rounded-3xl border bg-card p-6 text-card-foreground sm:p-8">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-10 w-full rounded-lg" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-28 w-full rounded-lg" />
+          <Skeleton className="h-3 w-48" />
+        </div>
+        <Skeleton className="h-10 w-40 rounded-full" />
+      </div>
+    </>
+  );
+}
+
 export function FilterSkeleton() {
   return (
-    <div className="mt-8 grid gap-3 rounded-3xl bg-block-cream p-4 sm:grid-cols-[1fr_240px]">
+    <div className="mt-8 grid gap-3 rounded-3xl bg-block-cream p-4 lg:grid-cols-[1fr_220px_190px]">
+      <Skeleton className="h-12 rounded-2xl bg-background/75" />
       <Skeleton className="h-12 rounded-2xl bg-background/75" />
       <Skeleton className="h-12 rounded-2xl bg-background/75" />
     </div>
@@ -253,6 +348,40 @@ export function PromptGridSkeleton({ count = 6 }: SkeletonListProps) {
     <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: count }).map((_, index) => (
         <PromptCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+}
+
+export function CollectionCardSkeleton() {
+  return (
+    <article className="flex min-h-[220px] flex-col rounded-2xl border bg-card p-5 text-card-foreground">
+      <div className="flex flex-wrap items-center gap-2">
+        <Skeleton className="h-5 w-24 rounded-full" />
+        <Skeleton className="h-5 w-24 rounded-full" />
+      </div>
+      <div className="mt-5 flex-1 space-y-3">
+        <Skeleton className="h-7 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+      </div>
+      <div className="mt-5 flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-end sm:justify-between">
+        <Skeleton className="h-4 w-28" />
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-8 w-16 rounded-full" />
+          <Skeleton className="h-8 w-16 rounded-full" />
+          <Skeleton className="h-8 w-20 rounded-full" />
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function CollectionGridSkeleton({ count = 4 }: SkeletonListProps) {
+  return (
+    <div className="mt-8 grid gap-5 md:grid-cols-2">
+      {Array.from({ length: count }).map((_, index) => (
+        <CollectionCardSkeleton key={index} />
       ))}
     </div>
   );
@@ -299,8 +428,8 @@ export function MyPromptListSkeleton({ count = 3 }: SkeletonListProps) {
 
 export function StatGridSkeleton() {
   return (
-    <div className="mt-8 grid gap-5 md:grid-cols-3">
-      {Array.from({ length: 3 }).map((_, index) => (
+    <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
         <div className="rounded-2xl border bg-card p-5" key={index}>
           <Skeleton className="h-4 w-28" />
           <Skeleton className="mt-6 h-10 w-16" />
